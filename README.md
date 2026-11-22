@@ -23,7 +23,7 @@ git clone git@github.com:jag3773/stratforge.git
 cd stratforge
 uv venv --python 3.13 .venv
 uv pip install -r requirements.txt
-.venv/bin/python -m strategies.live_node --config config/live_paper.json
+.venv/bin/python -m stratforge.live --config config/live_paper.json
 ```
 
 Paper must not load API keys. `LIVE_TRADING` stays false.

@@ -10,7 +10,7 @@ After=network-online.target
 [Service]
 Type=simple
 WorkingDirectory=%h/stratforge
-ExecStart=%h/stratforge/.venv/bin/python -u strategies/live_node.py --mode live --config config/live_micro.json
+ExecStart=%h/stratforge/.venv/bin/python -u -m stratforge.live --mode live --config config/live_micro.json
 Restart=on-failure
 RestartSec=30
 Environment=LIVE_TRADING=true
