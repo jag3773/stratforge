@@ -1,0 +1,30 @@
+{
+  "comment": "Micro-capital LIVE sleeve. DNA via _include (trend_rotation_25_max8_rotate). Percent sizing: clip = equity × max_alloc_pct (0.25). No dollar clip/book cap. Daily halt 10% of day-start equity. min_notional $5 only. Use only after paper soak + explicit LIVE approval.",
+  "strategy_id": "trend_rotation_25_max8_rotate",
+  "_include": "config/trend_rotation_25_max8_rotate.json",
+  "node_mode_default": "live",
+  "start_usd": 250.0,
+  "fee_rate": 0.001,
+  "venue_taker_fee_rate": 0.012,
+  "venue": "COINBASE",
+  "product": "spot",
+  "data_source": "direct_public_coinbase_exchange_api_5m_fold_4h",
+  "execution_backend": "ccxt",
+  "risk": {
+    "max_position_notional_usd": 0,
+    "max_total_notional_usd": 0,
+    "daily_loss_halt_usd": 0,
+    "daily_loss_halt_pct": 0.10,
+    "max_leverage": 1.0,
+    "max_alloc_pct": 0.25,
+    "max_concurrent": 8,
+    "long_only": true,
+    "allowed_products": ["spot"],
+    "allowed_symbols": [],
+    "min_notional_usd": 5.0,
+    "halt_mode": "live",
+    "halt_file": "data/TRADING_HALTED_live"
+  },
+  "buy_protect": {"enabled": true, "max_spread_bps": 40, "chase_cap_bps": 15},
+  "safety": "LIVE refused unless LIVE_TRADING=true, SIMULATION_MODE=false, data/LIVE_APPROVED, API keys. Micro sleeve only — scale via GO_LIVE_RECIPE.md gates. DNA knobs come from _include, not copies."
+}

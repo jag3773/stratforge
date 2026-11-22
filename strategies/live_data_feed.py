@@ -1,0 +1,351 @@
+"""
+Live data feed for Coinbase US (public, no API keys).
+
+* Seed 4h bars from parquet history for indicator warm-up.
+* Poll public 5m candles, fold to completed 4h bars, emit once per bucket.
+* Dedup: never re-emit a bucket already emitted (or already in *closed* seed tail).
+* Seed resample drops the still-forming last 4h bucket so restart emits the next official close.
+* Health file: data/feed_health.json for stall detection.
+
+No ccxt. Direct https://api.exchange.coinbase.com
+"""
+from __future__ import annotations
+
+import json
+import os
+import time
+from datetime import datetime, timezone
+from typing import Callable
+
+import pandas as pd
+import requests
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
+RAW_DIR = os.path.join(ROOT, "data", "raw")
+HEALTH_PATH = os.path.join(ROOT, "data", "feed_health.json")
+POLL_SLEEP = float(os.getenv("FEED_POLL_SLEEP", "2"))
+HISTORY_END = os.getenv("HISTORY_END")  # optional YYYY-MM-DD
+
+
+def _load_seed_4h(symbol: str, end_iso: str | None = None) -> list[dict]:
+    path = os.path.join(RAW_DIR, f"{symbol}_USD_5m.parquet")
+    if not os.path.exists(path):
+        return []
+    df = pd.read_parquet(path).tail(15000)
+    df["ts"] = pd.to_datetime(df["timestamp"], unit="ms", utc=True)
+    if end_iso:
+        df = df[df["ts"] < pd.Timestamp(end_iso, tz="UTC")]
+    if df.empty:
+        return []
+    df = df.set_index("ts").sort_index()
+    o = df["open"].resample("4h").first()
+    h = df["high"].resample("4h").max()
+    l = df["low"].resample("4h").min()
+    c = df["close"].resample("4h").last()
+    v = df["volume"].resample("4h").sum()
+    out = pd.DataFrame({"open": o, "high": h, "low": l, "close": c, "volume": v}).dropna()
+    bars = []
+    for t, row in out.iterrows():
+        bars.append(
+            {
+                "ts": int(t.timestamp() * 1_000_000_000),
+                "open": float(row["open"]),
+                "high": float(row["high"]),
+                "low": float(row["low"]),
+                "close": float(row["close"]),
+                "volume": float(row["volume"]),
+            }
+        )
+    # Drop still-forming last bucket so warmup/_last_emitted never stamp it.
+    return trim_unclosed_seed_bars(bars[-300:])
+
+
+FOUR_H_MS = 4 * 3600 * 1000
+
+
+def _floor_4h_ms(ts_ms: int) -> int:
+    secs = ts_ms // 1000
+    return (secs // (4 * 3600)) * FOUR_H_MS
+
+
+def bucket_end_ms(bucket_ms: int) -> int:
+    return int(bucket_ms) + FOUR_H_MS
+
+
+def bucket_is_closed(bucket_ms: int, now_ms: int | None = None) -> bool:
+    """True once wall clock has reached official 4h close (00/04/08/12/16/20 UTC)."""
+    now = int(time.time() * 1000) if now_ms is None else int(now_ms)
+    return now >= bucket_end_ms(bucket_ms)
+
+
+def bucket_ms_from_bar_ts(ts: int) -> int:
+    """Normalize bar ts to 4h bucket start in milliseconds.
+
+    Accepts ns (seed / live), ms, or seconds.
+    """
+    t = int(ts)
+    # ~ year 2001 in ns is 1e15; current ns ~1.7e18
+    if t > 10_000_000_000_000_000:  # clearly nanoseconds
+        ts_ms = t // 1_000_000
+    elif t > 10_000_000_000:  # milliseconds
+        ts_ms = t
+    else:  # seconds
+        ts_ms = t * 1000
+    return _floor_4h_ms(ts_ms)
+
+
+def bar_ts_ns_from_bucket_ms(bucket_ms: int) -> int:
+    return int(bucket_ms) * 1_000_000
+
+
+def trim_unclosed_seed_bars(
+    bars: list[dict], now_ms: int | None = None
+) -> list[dict]:
+    """Drop trailing 4h bars that have not officially closed (00/04/08/12/16/20 UTC).
+
+    pandas resample includes the in-progress last bucket whenever any 5m exists.
+    Stamping that bucket as _last_emitted skips the first live close after restart.
+    """
+    if not bars:
+        return list(bars)
+    out = list(bars)
+    wall = int(time.time() * 1000) if now_ms is None else int(now_ms)
+    while out:
+        bkt = bucket_ms_from_bar_ts(out[-1]["ts"])
+        if bucket_is_closed(bkt, wall):
+            break
+        out.pop()
+    return out
+
+
+class LiveDataFeed:
+    def __init__(
+        self,
+        symbols: list[str],
+        on_4h_bar: Callable,
+        history_end_iso: str | None = None,
+        poll_sleep: float = POLL_SLEEP,
+        health_path: str = HEALTH_PATH,
+    ):
+        self.symbols = symbols
+        self.on_4h_bar = on_4h_bar
+        self.history_end_iso = history_end_iso
+        self.poll_sleep = poll_sleep
+        self.health_path = health_path
+        self._cur: dict[str, dict] = {}  # sym -> {bucket_ms, bar}
+        self._seed_bars: dict[str, list[dict]] = {}
+        # last emitted bucket start (ms) per symbol — prevent double emit
+        self._last_emitted: dict[str, int] = {}
+        self._stop = False
+        self._cycle = 0
+        self._bars_emitted = 0
+        self._fetch_ok = 0
+        self._fetch_fail = 0
+        self._last_bar_ts = None  # wall clock ISO of last emit
+        self._last_bar_symbol = None
+        self._last_bar_bucket = None
+        self._early_hold_logged: set[tuple[str, int]] = set()
+        self._dedup_logged: set[tuple[str, int]] = set()
+
+    def seed(self) -> dict[str, list[dict]]:
+        for sym in self.symbols:
+            bars = trim_unclosed_seed_bars(_load_seed_4h(sym, self.history_end_iso))
+            self._seed_bars[sym] = bars
+            if bars:
+                # Last *closed* seed bucket only — never the forming bar.
+                self._last_emitted[sym] = bucket_ms_from_bar_ts(bars[-1]["ts"])
+        return self._seed_bars
+
+    def init_emitted_from_seed(
+        self,
+        seed_bars: dict[str, list[dict]] | None = None,
+        now_ms: int | None = None,
+    ):
+        """Call after external seed warm-up so live won't replay last *closed* seed bar."""
+        src = seed_bars if seed_bars is not None else self._seed_bars
+        for sym, bars in src.items():
+            closed = trim_unclosed_seed_bars(bars, now_ms=now_ms)
+            if seed_bars is None:
+                self._seed_bars[sym] = closed
+            if closed:
+                self._last_emitted[sym] = bucket_ms_from_bar_ts(closed[-1]["ts"])
+            else:
+                self._last_emitted.pop(sym, None)
+
+    def _emit(self, symbol: str, bar: dict, reason: str):
+        bkt = bucket_ms_from_bar_ts(bar["ts"])
+        prev = self._last_emitted.get(symbol, -1)
+        if bkt <= prev:
+            key = (symbol, int(bkt))
+            if key not in self._dedup_logged:
+                self._dedup_logged.add(key)
+                print(
+                    f"[feed] skip 4h {symbol} bucket={bkt} "
+                    f"(already emitted prev={prev}) via={reason}",
+                    flush=True,
+                )
+            return False
+        self._last_emitted[symbol] = bkt
+        self._bars_emitted += 1
+        self._last_bar_ts = datetime.now(timezone.utc).isoformat()
+        self._last_bar_symbol = symbol
+        self._last_bar_bucket = bkt
+        print(
+            f"[feed] emit 4h {symbol} bucket={bkt} close={bar['close']:.6g} via={reason}",
+            flush=True,
+        )
+        try:
+            self.on_4h_bar(symbol, bar)
+        except Exception as e:
+            print(f"[feed] ERROR on_4h_bar {symbol}: {e!r}", flush=True)
+            raise
+        self._write_health()
+        return True
+
+    def _write_health(self):
+        payload = {
+            "ts": datetime.now(timezone.utc).isoformat(),
+            "cycle": self._cycle,
+            "symbols": len(self.symbols),
+            "bars_emitted": self._bars_emitted,
+            "fetch_ok": self._fetch_ok,
+            "fetch_fail": self._fetch_fail,
+            "last_bar_ts": self._last_bar_ts,
+            "last_bar_symbol": self._last_bar_symbol,
+            "last_bar_bucket": self._last_bar_bucket,
+            "forming_buckets": {s: c["bucket"] for s, c in self._cur.items()},
+        }
+        try:
+            tmp = self.health_path + ".tmp"
+            with open(tmp, "w") as f:
+                json.dump(payload, f, indent=2)
+            os.replace(tmp, self.health_path)
+        except Exception as e:
+            print(f"[feed] health write failed: {e!r}", flush=True)
+
+    def _ingest_5m(self, symbol: str, ohlcv: list, now_ms: int | None = None):
+        wall = int(time.time() * 1000) if now_ms is None else int(now_ms)
+        for row in ohlcv:
+            ts_ms, o, h, l, c, v = row[0], row[1], row[2], row[3], row[4], row[5]
+            bucket = _floor_4h_ms(int(ts_ms))
+            if bucket > wall:
+                continue
+            cur = self._cur.get(symbol)
+            if cur is not None and cur["bucket"] == bucket:
+                b = cur["bar"]
+                b["high"] = max(b["high"], float(h))
+                b["low"] = min(b["low"], float(l))
+                b["close"] = float(c)
+                b["volume"] += float(v)
+                continue
+            if cur is not None:
+                if bucket < cur["bucket"]:
+                    continue
+                if not bucket_is_closed(cur["bucket"], wall):
+                    key = (symbol, int(cur["bucket"]))
+                    if key not in self._early_hold_logged:
+                        self._early_hold_logged.add(key)
+                        print(
+                            f"[feed] hold 4h {symbol} (next-bucket 5m before close "
+                            f"cur={cur['bucket']} got={bucket})",
+                            flush=True,
+                        )
+                    continue
+                bar = cur["bar"].copy()
+                bar["ts"] = bar_ts_ns_from_bucket_ms(cur["bucket"])
+                self._emit(symbol, bar, reason="bucket-cross")
+            self._cur[symbol] = {
+                "bucket": bucket,
+                "bar": {
+                    "ts": bar_ts_ns_from_bucket_ms(bucket),
+                    "open": float(o),
+                    "high": float(h),
+                    "low": float(l),
+                    "close": float(c),
+                    "volume": float(v),
+                },
+            }
+
+    def _maybe_emit_closed(self, symbol: str, now_ms: int | None = None):
+        cur = self._cur.get(symbol)
+        if not cur:
+            return
+        wall = int(time.time() * 1000) if now_ms is None else int(now_ms)
+        bucket = cur["bucket"]
+        if bucket_is_closed(bucket, wall):
+            bar = cur["bar"].copy()
+            bar["ts"] = bar_ts_ns_from_bucket_ms(bucket)
+            if self._emit(symbol, bar, reason="time-close"):
+                del self._cur[symbol]
+
+    def _safe_fetch(self, symbol: str, limit: int = 100, max_retries: int = 4):
+        delay = 2.0
+        last_err = None
+        for attempt in range(max_retries):
+            try:
+                product = f"{symbol}-USD"
+                url = f"https://api.exchange.coinbase.com/products/{product}/candles"
+                resp = requests.get(url, params={"granularity": 300}, timeout=15)
+                if resp.status_code == 200:
+                    raw = resp.json()
+                    ohlcv = []
+                    for row in raw[:limit]:
+                        ts_ms = int(row[0]) * 1000
+                        low = float(row[1])
+                        high = float(row[2])
+                        open_ = float(row[3])
+                        close = float(row[4])
+                        vol = float(row[5])
+                        ohlcv.append([ts_ms, open_, high, low, close, vol])
+                    self._fetch_ok += 1
+                    return ohlcv
+                last_err = f"HTTP {resp.status_code}"
+                time.sleep(delay)
+                delay = min(delay * 2, 20)
+            except Exception as e:
+                last_err = repr(e)
+                time.sleep(min(5, delay))
+                delay = min(delay * 2, 20)
+        self._fetch_fail += 1
+        if self._fetch_fail <= 5 or self._fetch_fail % 50 == 0:
+            print(f"[feed] fetch fail {symbol}: {last_err}", flush=True)
+        return None
+
+    def run(self):
+        self._stop = False
+        self._cycle = 0
+        per_symbol_sleep = float(os.getenv("FEED_SYMBOL_SLEEP", "1.5"))
+        print(
+            f"[feed] run start symbols={len(self.symbols)} "
+            f"symbol_sleep={per_symbol_sleep}s",
+            flush=True,
+        )
+        self._write_health()
+        while not self._stop:
+            t0 = time.time()
+            ok = fail = 0
+            for sym in self.symbols:
+                if self._stop:
+                    break
+                ohlcv = self._safe_fetch(sym, limit=100)
+                if ohlcv:
+                    ok += 1
+                    ohlcv.sort(key=lambda r: r[0])
+                    self._ingest_5m(sym, ohlcv)
+                else:
+                    fail += 1
+                self._maybe_emit_closed(sym)
+                time.sleep(per_symbol_sleep)
+            self._cycle += 1
+            dt = time.time() - t0
+            print(
+                f"[feed] cycle={self._cycle} ok={ok} fail={fail} "
+                f"emitted_total={self._bars_emitted} dt={dt:.1f}s",
+                flush=True,
+            )
+            self._write_health()
+            time.sleep(self.poll_sleep)
+
+    def stop(self):
+        self._stop = True

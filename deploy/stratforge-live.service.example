@@ -1,0 +1,21 @@
+# Live example. Do not install until the promote gates in docs/PROMOTE.md pass.
+# Set STATE to the directory that holds data/LIVE_APPROVED, journals, and logs.
+# Point EnvironmentFile at a mode-600 file that is not in git.
+# Do not put keys, portfolio ids, or hostnames in this file.
+
+[Unit]
+Description=stratforge live node
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/stratforge
+ExecStart=%h/stratforge/.venv/bin/python -u strategies/live_node.py --mode live --config config/live_micro.json
+Restart=on-failure
+RestartSec=30
+Environment=LIVE_TRADING=true
+Environment=SIMULATION_MODE=false
+EnvironmentFile=-%h/stratforge/.env.live
+
+[Install]
+WantedBy=default.target

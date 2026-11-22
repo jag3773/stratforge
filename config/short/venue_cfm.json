@@ -1,0 +1,44 @@
+{
+  "comment": "US Coinbase Financial Markets perpetual-style futures assumptions for short research. Not a live enablement file.",
+  "venue": "CFM",
+  "product": "us_perpetual_style_futures",
+  "regulator": "CFTC",
+  "short_only_live_universe": ["BTC", "ETH"],
+  "contracts": {
+    "BTC": {
+      "name": "nano Bitcoin Perpetual-Style Futures",
+      "root": "BIP",
+      "multiplier_coins": 0.01,
+      "quote": "USD",
+      "cash_settled": true
+    },
+    "ETH": {
+      "name": "nano Ether Perpetual-Style Futures",
+      "root": "ETP",
+      "multiplier_coins": 0.10,
+      "quote": "USD",
+      "cash_settled": true
+    }
+  },
+  "hours": "24/7 with weekly 1h break Friday 17:00-18:00 ET (assumption from Coinbase Derivatives pages)",
+  "max_advertised_leverage": 10.0,
+  "research_leverage": 1.0,
+  "fee_rate_advertised": 0.0002,
+  "fee_rate_research_default": 0.0004,
+  "fee_note": "Coinbase Jul 2025 CFM perp launch post said fees as low as 0.02% per contract. Research default is 4 bps per side (8 bps RT) until we scrape a live CFM fee schedule from the funded account.",
+  "funding_per_8h_research": 0.00003,
+  "funding_note": "CFM perps use a premium/funding mechanism. Historical series not in this repo. Research charges shorts 0.3 bp each 8h (~3.3%/yr if always short) and NEVER credits funding, so carry cannot manufacture the edge.",
+  "price_proxy": "Coinbase spot USD 5m folded to 4h (data/raw/BTC_USD_5m.parquet, ETH_USD_5m.parquet). Basis vs BIP/ETP is unmodeled.",
+  "out_of_scope": [
+    "Coinbase US spot (cannot short)",
+    "Offshore perps / Deribit / INTX",
+    "Alt-coin universe",
+    "Live orders"
+  ],
+  "sources": [
+    "https://www.coinbase.com/blog/perpetual-futures-have-arrived-in-the-us",
+    "https://www.coinbase.com/learn/futures/24-7-trading",
+    "https://www.coinbase.com/derivatives",
+    "https://help.coinbase.com/derivatives/perpetual-style-futures/contract-specifications"
+  ]
+}

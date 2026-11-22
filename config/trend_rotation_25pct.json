@@ -1,0 +1,63 @@
+{
+  "comment": "RESEARCH BASELINE (max50, no rotate). PRODUCTION SSOT as of 2026-08-03: config/trend_rotation_25_max8_rotate.json + config/live_paper.json (max8, rotate underwater-only, hold=14). Archived twin: trend_rotation_25_baseline_max50.json. Core DNA still breakout/slow_EMA/25% alloc.",
+  "mode": "breakout",
+  "bar_minutes": 240,
+  "channel_period": 60,
+  "atr_stop_mult": 0.0,
+  "cooldown_bars": 2,
+  "trend_filter": true,
+  "long_only": true,
+  "exit_mode": "slow_ema",
+  "slow_ema_buffer": 0.0,
+  "max_concurrent": 50,
+  "max_alloc_pct": 0.25,
+  "risk_percentage": 0.01,
+  "_mechanics": "Enter long when price breaks above the 60-period 4h channel AND price>trend_filter slow EMA (bull regime). Ride with NO hard stop (atr_stop_mult=0); exit only when price closes below the slow EMA. Cap each position at 25% of equity (max_alloc_pct) so up to 4 coins held concurrently. Long-only. Re-entries allowed after cooldown_bars=2 (8h).",
+  "results_2023_2026_3yr": {
+    "strategy_end_usd": 294605.3,
+    "strategy_return_pct": 29360.53,
+    "btc_buyhold_end_usd": 2124.02,
+    "btc_buyhold_return_pct": 112.4,
+    "beats_btc_buyhold": true,
+    "closed_trades": 183,
+    "win_rate": 88.52,
+    "coins_traded": 48,
+    "max_drawdown_pct": -34.55,
+    "annualized_vol_pct": 21.0,
+    "sharpe_annualized": 0.35,
+    "sortino_annualized": 0.05,
+    "calmar": 849.77,
+    "equity_curve_source": "per_bar_mark_to_market (235,218 points)"
+  },
+  "results_oos_2024_2026_2yr_at_10pct_cap": {
+    "strategy_return_pct": 1676.3,
+    "btc_buyhold_return_pct": -1.5,
+    "beats_btc_buyhold": true
+  },
+  "results_consistency_3yr_split_25pct_cap": {
+    "note": "Beats BTC in EVERY 1-year slice of the 3-year period (up, flat, and down BTC regimes).",
+    "year1_2023_07_18_to_2024_07_18": {"strategy_return_pct": 1755.23, "btc_return_pct": 113.35, "beats": true, "win_rate": 83.0, "coins": 30},
+    "year2_2024_07_18_to_2025_07_18": {"strategy_return_pct": 778.12, "btc_return_pct": 84.19, "beats": true, "win_rate": 84.9, "coins": 36},
+    "year3_2025_07_18_to_2026_07_18": {"strategy_return_pct": 286.81, "btc_return_pct": -46.90, "beats": true, "win_rate": 71.2, "coins": 35}
+  },
+  "results_long_window_2020_2026_6p5yr_25pct_cap": {
+    "window": "2020-01-01 -> 2026-07-18",
+    "data_note": "12 coins have 2020 data (BTC,ETH,BCH,ETC,LINK,LTC,OXT,XLM,XRP,UNI,ZEC,AAVE); others start at listing (2023+).",
+    "strategy_end_usd": 372054.69,
+    "strategy_return_pct": 37105.47,
+    "btc_buyhold_end_usd": 8877.12,
+    "btc_buyhold_return_pct": 787.71,
+    "beats_btc_buyhold": true,
+    "closed_trades": 165,
+    "win_rate": 90.91,
+    "coins_traded": 44,
+    "max_drawdown_pct": -29.45,
+    "annualized_vol_pct": 13.0,
+    "sharpe_annualized": 0.33,
+    "sortino_annualized": 0.03,
+    "calmar": 1260.13,
+    "equity_curve_source": "per_bar_mark_to_market (long-window)"
+  },
+  "benchmarks_note": "Equal-weight basket of all 50 coins (+46.9% over 3yr) is NOT beatable by trend-following (ZEC +1603% / VVV +590% dominate the mean). The strategy beats buy-and-hold on 37/50 individual coins. This config targets the user's stated benchmark: beat buying-and-holding Bitcoin, with the strategy choosing coins.",
+  "risk": "Capital is fully invested and rotates between trending coins; large interim drawdowns are expected (verify via strategies/portfolio_risk.py). Dry-run/paper only. Live trading gated behind explicit approval."
+}

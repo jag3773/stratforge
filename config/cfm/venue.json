@@ -1,0 +1,35 @@
+{
+  "comment": "Coinbase Derivatives (CDE) via CFM FCM. Research catalog only. Not a live enablement file.",
+  "venue": "CFM",
+  "product": "us_perpetual_style_futures",
+  "regulator": "CFTC",
+  "research_leverage_overnight": 4.0,
+  "max_advertised_intraday_leverage": 10.0,
+  "leverage_note": "10x is weekday intraday only (6pm-4pm ET). Overnight/weekend/4h-hold research uses overnight IM ~25% = 4x. Do not score 10x holds.",
+  "fee_rate_research_default": 0.0004,
+  "fee_note": "CDE BIP non-pro electronic is ~$0.10/side/contract. Research uses 4 bps of notional per side (conservative).",
+  "funding_per_8h_research": 0.00003,
+  "funding_policy": "constant_debit_never_credit",
+  "funding_note": "No CFM funding history in repo. Both sides pay 0.3 bp / 8h. Carry cannot manufacture an edge.",
+  "maintenance_frac_of_im": 0.50,
+  "hours": "24/7 except Friday 17:00-18:00 ET",
+  "expiry_note": "5-year dated perp-style; listing exp 20 Dec 2030",
+  "price_proxy": "Coinbase spot USD 5m folded to 4h. Basis vs BIP/ETP/SLP/XPP unmodeled.",
+  "smoke_universe": ["BTC"],
+  "research_universe": ["BTC", "ETH", "SOL", "XRP"],
+  "out_of_scope": [
+    "spot short",
+    "offshore / INTX / Bermuda",
+    "equity/metal/energy CDE",
+    "live orders",
+    "trend_rotation_25_max8_rotate",
+    "the live sleeve portfolio",
+    "intraday 10x on 4h holds"
+  ],
+  "contracts": {
+    "BTC": {"name": "nano Bitcoin Perp-Style Futures", "root": "BIP", "multiplier_coins": 0.01, "quote": "USD", "style": "perp", "cash_settled": true},
+    "ETH": {"name": "nano Ether Perp-Style Futures", "root": "ETP", "multiplier_coins": 0.10, "quote": "USD", "style": "perp", "cash_settled": true},
+    "SOL": {"name": "nano Solana Perp-Style Futures", "root": "SLP", "multiplier_coins": 5.0, "quote": "USD", "style": "perp", "cash_settled": true},
+    "XRP": {"name": "nano XRP Perp-Style Futures", "root": "XPP", "multiplier_coins": 500.0, "quote": "USD", "style": "perp", "cash_settled": true}
+  }
+}

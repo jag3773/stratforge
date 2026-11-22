@@ -1,0 +1,6 @@
+{
+  "comment": "RESEARCH ONLY. Production DNA + same-bar least-extended breakout (breakout_pct ascending). Do not point paper/live here.",
+  "strategy_id": "trend_rotation_25_max8_rotate",
+  "_include": "config/trend_rotation_25_max8_rotate.json",
+  "rank_entries": "breakout_least"
+}

@@ -1,0 +1,6 @@
+{
+  "comment": "RESEARCH ONLY. Production DNA + same-bar entry rank by raw breakout_pct (close/channel_high - 1). Do not point paper/live at this until staggered cohort is reviewed.",
+  "strategy_id": "trend_rotation_25_max8_rotate",
+  "_include": "config/trend_rotation_25_max8_rotate.json",
+  "rank_entries": "breakout_pct"
+}

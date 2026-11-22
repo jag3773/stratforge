@@ -1,0 +1,6 @@
+{
+  "comment": "RESEARCH ONLY. Production DNA + fixed same-bar symbol permutation seed 1. Do not point paper/live here.",
+  "strategy_id": "trend_rotation_25_max8_rotate",
+  "_include": "config/trend_rotation_25_max8_rotate.json",
+  "rank_entries": "symbol_perm:1"
+}

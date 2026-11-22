@@ -1,0 +1,26 @@
+# Generic viz vhost. Set the root to the checkout that holds viz/web/dist
+# and to the directory where the projector writes snapshots.
+# Do not commit the password file. Auth is an include you supply.
+
+server {
+    listen 127.0.0.1:8088;
+    server_name _;
+
+    limit_except GET HEAD { deny all; }
+    autoindex off;
+    server_tokens off;
+
+    location = /index.json {
+        alias /var/lib/stratforge/snapshots/index.json;
+        default_type application/json;
+        add_header Cache-Control "no-store";
+    }
+
+    location / {
+        root /var/lib/stratforge/viz/web/dist;
+        try_files $uri $uri/ /index.html;
+    }
+
+    location ~ /\. { deny all; }
+    location ^~ /data/ { deny all; }
+}

@@ -1,0 +1,18 @@
+# Paper example. User unit. %h is the installing user's home.
+# This file does not start live orders.
+
+[Unit]
+Description=stratforge paper node
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/stratforge
+ExecStart=%h/stratforge/.venv/bin/python -u strategies/live_node.py --config config/live_paper.json
+Restart=on-failure
+RestartSec=30
+Environment=LIVE_TRADING=false
+Environment=SIMULATION_MODE=true
+
+[Install]
+WantedBy=default.target

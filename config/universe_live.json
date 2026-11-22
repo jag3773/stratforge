@@ -1,0 +1,15 @@
+{
+  "comment": "Admitted LIVE universe SSOT for paper/live_node. Only promote.py/demote.py may edit. Live bot must never read watchlist.",
+  "strategy_id": "trend_rotation_25_max8_rotate",
+  "venue": "COINBASE",
+  "quote": "USD",
+  "updated_at": "2026-08-06T00:00:00+00:00",
+  "updated_by": "bootstrap_from_live_node_UNIVERSE",
+  "symbols": [
+    "AAVE", "ADA", "AERO", "ALLO", "ASTER", "AVAX", "BCH", "BNB", "BONK", "BTC", "CRO",
+    "DOGE", "DOT", "ETC", "ETH", "HBAR", "HIGH", "HYPE", "ICP", "INJ", "JASMY", "KAITO",
+    "LINK", "LTC", "MANTLE", "MORPHO", "NEAR", "NKN", "ONDO", "OXT", "PAXG", "PENGU",
+    "PEPE", "POL", "PUMP", "SHIB", "SKY", "SOL", "SUI", "TAO", "TON", "TRAC", "UNI",
+    "USELESS", "VVV", "WLD", "WLFI", "XLM", "XRP", "ZEC"
+  ]
+}

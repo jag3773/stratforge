@@ -1,0 +1,30 @@
+{
+  "comment": "PRODUCTION SSOT: trend_rotation_25 core + max8 + rotate underwater-only + hold 14. slow_ema_exit_underwater sells a close under the 200-bar EMA even if the lot is red. atr_stop_mult stays 0. CASH spot.",
+  "strategy_id": "trend_rotation_25_max8_rotate",
+  "mode": "breakout",
+  "bar_minutes": 240,
+  "channel_period": 60,
+  "atr_stop_mult": 0.0,
+  "cooldown_bars": 2,
+  "trend_filter": true,
+  "long_only": true,
+  "exit_mode": "slow_ema",
+  "slow_ema_buffer": 0.0,
+  "slow_ema_exit_underwater": true,
+  "max_concurrent": 8,
+  "max_alloc_pct": 0.25,
+  "risk_percentage": 0.01,
+  "btc_regime_filter": false,
+  "cat_stop_pct": 0.0,
+  "rotate_when_full": true,
+  "rotate_min_hold_bars": 14,
+  "account_type": "CASH",
+  "_parent": "config/trend_rotation_25pct.json",
+  "_changes_vs_parent": {
+    "max_concurrent": "50 -> 8",
+    "rotate_when_full": "false -> true",
+    "rotate_min_hold_bars": "n/a -> 14 (~2.3 days on 4h; stress-grid best mean/med balance)"
+  },
+  "_mechanics": "Core trend_rotation_25 breakout + slow_EMA exit, 25% max alloc. Cap 8 concurrent longs. When full and a new name breaks out: only rotate out an underwater name (MTM% < 0) held at least rotate_min_hold_bars=14, choosing the weakest MTM%. Winners are never force-rotated. Slow-EMA remains primary trend exit. Slot ledger (_long_slots) is authoritative under same-bar multi-coin fills.",
+  "_cohort_note": "Clean max8+rotate CASH cohort (hold was 10 in first verified run): open_max=8, avg/med ret far above baseline max50 inventory; m10 -62%->+17%. Hold-14 preferred from stress grid for avg/med; m10 sometimes stronger near hold 10."
+}

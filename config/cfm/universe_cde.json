@@ -1,0 +1,28 @@
+{
+  "comment": "CDE crypto perp-style nanos with public 1h candles. Exclude PAXG. Research catalog 2026-08-27.",
+  "symbols": {
+    "BTC": {"product_id": "BIP-20DEC30-CDE", "multiplier": 0.01},
+    "ETH": {"product_id": "ETP-20DEC30-CDE", "multiplier": 0.10},
+    "SOL": {"product_id": "SLP-20DEC30-CDE", "multiplier": 5.0},
+    "XRP": {"product_id": "XPP-20DEC30-CDE", "multiplier": 500.0},
+    "ADA": {"product_id": "ADP-20DEC30-CDE", "multiplier": 1000.0},
+    "AAVE": {"product_id": "AVE-20DEC30-CDE", "multiplier": 5.0},
+    "AVAX": {"product_id": "AVP-20DEC30-CDE", "multiplier": 10.0},
+    "BCH": {"product_id": "BCP-20DEC30-CDE", "multiplier": 1.0},
+    "BNB": {"product_id": "BNB-20DEC30-CDE", "multiplier": 1.0},
+    "DOGE": {"product_id": "DOP-20DEC30-CDE", "multiplier": 5000.0},
+    "ENA": {"product_id": "ENA-20DEC30-CDE", "multiplier": 5000.0},
+    "HBAR": {"product_id": "HEP-20DEC30-CDE", "multiplier": 5000.0},
+    "HYPE": {"product_id": "HYP-20DEC30-CDE", "multiplier": 10.0},
+    "LTC": {"product_id": "LCP-20DEC30-CDE", "multiplier": 5.0},
+    "LINK": {"product_id": "LNP-20DEC30-CDE", "multiplier": 50.0},
+    "NEAR": {"product_id": "NER-20DEC30-CDE", "multiplier": 500.0},
+    "ONDO": {"product_id": "OND-20DEC30-CDE", "multiplier": 1000.0},
+    "PEPE": {"product_id": "PEP-20DEC30-CDE", "multiplier": 100000.0},
+    "DOT": {"product_id": "POP-20DEC30-CDE", "multiplier": 100.0},
+    "SHIB": {"product_id": "SHP-20DEC30-CDE", "multiplier": 10000.0},
+    "SUI": {"product_id": "SUP-20DEC30-CDE", "multiplier": 500.0},
+    "XLM": {"product_id": "XLP-20DEC30-CDE", "multiplier": 5000.0},
+    "ZEC": {"product_id": "ZEC-20DEC30-CDE", "multiplier": 1.0}
+  }
+}

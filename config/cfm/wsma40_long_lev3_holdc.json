@@ -1,0 +1,15 @@
+{
+  "strategy_id": "cfm_wsma40_long_lev3_holdc_btc",
+  "comment": "Paper candidate A. Not live. Not trend_rotation.",
+  "sma_weeks": 40,
+  "leverage": 3.0,
+  "short_enabled": false,
+  "hold_contracts": true,
+  "symbols": ["BTC"],
+  "max_leverage": 4.0,
+  "fee_rate": 0.0004,
+  "funding_per_8h": 0.00003,
+  "integer_contracts": true,
+  "start_usd": 1000,
+  "price_proxy": "spot_5m_to_4h"
+}

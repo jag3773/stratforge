@@ -1,0 +1,27 @@
+{
+  "comment": "Admission clear_bar subset 2026-08-12 (qa+single+single-name-stagger). Research only \u2014 not live universe.",
+  "source": "results/admission/cohort_calibration_2026-08-12.json",
+  "strategy_id": "trend_rotation_25_max8_rotate",
+  "n": 19,
+  "symbols": [
+    "ADA",
+    "ALLO",
+    "BTC",
+    "DOGE",
+    "HBAR",
+    "HYPE",
+    "LINK",
+    "MANTLE",
+    "MORPHO",
+    "ONDO",
+    "PAXG",
+    "PENGU",
+    "SOL",
+    "SUI",
+    "USELESS",
+    "VVV",
+    "XLM",
+    "XRP",
+    "ZEC"
+  ]
+}

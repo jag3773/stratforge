@@ -1,0 +1,30 @@
+{
+  "comment": "LIVE production sleeve config (flags still off until LIVE_APPROVED). Opening $250 on 2026-08-16 + $250 CASH_DEPOSIT 2026-08-18 (contributed $500). DNA via _include.",
+  "strategy_id": "trend_rotation_25_max8_rotate",
+  "_include": "config/trend_rotation_25_max8_rotate.json",
+  "node_mode_default": "live",
+  "start_usd": 250.0,
+  "fee_rate": 0.001,
+  "venue": "COINBASE",
+  "product": "spot",
+  "data_source": "direct_public_coinbase_exchange_api_5m_fold_4h",
+  "execution_backend": "ccxt",
+  "risk": {
+    "max_position_notional_usd": 0,
+    "max_total_notional_usd": 0,
+    "daily_loss_halt_usd": 0,
+    "daily_loss_halt_pct": 0.10,
+    "max_leverage": 1.0,
+    "max_alloc_pct": 0.25,
+    "max_concurrent": 8,
+    "long_only": true,
+    "allowed_products": [
+      "spot"
+    ],
+    "allowed_symbols": [],
+    "min_notional_usd": 5.0,
+    "halt_mode": "live",
+    "halt_file": "data/TRADING_HALTED_live"
+  },
+  "safety": "LIVE still needs LIVE_TRADING=true, SIMULATION_MODE=false, data/LIVE_APPROVED, API keys. Spot long-only. Empty allowed_symbols = full live_node.UNIVERSE after risk module resolve. DNA knobs come from _include, not copies."
+}

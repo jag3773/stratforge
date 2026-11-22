@@ -1,0 +1,19 @@
+{
+  "comment": "PAPER SOAK DNA — daily Donchian 20/10. Not production SSOT. Not LIVE.",
+  "strategy_id": "donch_d20_10",
+  "family": "donch_d20_10",
+  "mode": "donchian",
+  "bar_minutes": 1440,
+  "channel_period": 20,
+  "exit_mode": "donchian_10",
+  "atr_stop_mult": 0.0,
+  "entry_n": 20,
+  "exit_n": 10,
+  "max_concurrent": 8,
+  "max_alloc_pct": 0.25,
+  "rotate_when_full": true,
+  "rotate_min_hold_bars": 3,
+  "long_only": true,
+  "account_type": "CASH",
+  "decision_ssot": "strategies/research_families.py FamilyEngine"
+}

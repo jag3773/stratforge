@@ -1,0 +1,12 @@
+{
+  "comment": "RESEARCH ONLY. Same DNA as trend_rotation_25_max8_rotate, plus slow_ema_exit_underwater. A close under the 200-bar EMA sells even if the lot is red. Not a hard stop. Not paper. Not LIVE until a 37-birth CASH replay is accepted.",
+  "strategy_id": "trend_rotation_25_max8_rotate_ema_underwater",
+  "_include": "config/trend_rotation_25_max8_rotate.json",
+  "slow_ema_exit_underwater": true,
+  "atr_stop_mult": 0.0,
+  "exit_mode": "slow_ema",
+  "max_alloc_pct": 0.25,
+  "max_concurrent": 8,
+  "rotate_when_full": true,
+  "rotate_min_hold_bars": 14
+}

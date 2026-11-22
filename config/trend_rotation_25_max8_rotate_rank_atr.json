@@ -1,0 +1,6 @@
+{
+  "comment": "RESEARCH ONLY. Production DNA + same-bar entry rank by ATR-normalized breakout ((close-channel_high)/ATR). Do not point paper/live here until staggered cohort is reviewed.",
+  "strategy_id": "trend_rotation_25_max8_rotate",
+  "_include": "config/trend_rotation_25_max8_rotate.json",
+  "rank_entries": "breakout_atr"
+}

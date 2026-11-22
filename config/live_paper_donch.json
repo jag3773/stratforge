@@ -1,0 +1,33 @@
+{
+  "comment": "ISOLATED paper soak for donch_d20_10. Does not share SSOT paper journal, health, lock, or 4h clock. Opening $500 on 2026-09-06 + CASH_DEPOSIT $250 on 2026-09-26 = contributed $750. start_usd stays the opening number. CASH spot. Not LIVE. Not SSOT.",
+  "strategy_id": "donch_d20_10",
+  "_include": "config/donch_d20_10.json",
+  "start_usd": 500.0,
+  "venue": "COINBASE",
+  "runtime": ".venv (ccxt/pandas; Nautilus archived)",
+  "data_source": "direct_public_coinbase_exchange_api_5m_fold_1d",
+  "clock": "REST public Coinbase 5m folded to UTC daily. Isolated DailyDataFeed.",
+  "fill_model": "simulated_at_bar_close",
+  "fee_rate": 0.001,
+  "journal_path": "data/execution_log_donch.jsonl",
+  "node_health_path": "data/node_health_donch.json",
+  "feed_health_path": "data/feed_health_donch.json",
+  "lock_mode": "paper_donch",
+  "log_path": "data/live_paper_donch.log",
+  "risk": {
+    "max_position_notional_usd": 0,
+    "max_total_notional_usd": 0,
+    "daily_loss_halt_usd": 0,
+    "daily_loss_halt_pct": 0.10,
+    "max_leverage": 1.0,
+    "max_alloc_pct": 0.25,
+    "max_concurrent": 8,
+    "long_only": true,
+    "allowed_products": ["spot"],
+    "allowed_symbols": [],
+    "min_notional_usd": 5.0,
+    "halt_mode": "",
+    "halt_file": "data/TRADING_HALTED_paper_donch"
+  },
+  "safety": "PAPER ONLY. Isolated book. Global TRADING_HALTED still flattens. TRADING_HALTED_paper does not. LIVE_TRADING must stay false. Restart restores this journal only."
+}

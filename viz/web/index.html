@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>pro-trader viz</title>
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("viz.theme");
+          if (t !== "light" && t !== "dark") {
+            t = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+          }
+          document.documentElement.dataset.theme = t;
+        } catch (e) {
+          document.documentElement.dataset.theme = "dark";
+        }
+      })();
+    </script>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <a class="skip" href="#app">Skip to content</a>
+    <header>
+      <div class="bar">
+        <div class="brand">pro-trader viz</div>
+        <nav aria-label="Primary">
+          <a href="#/book" data-nav="book">Book</a>
+          <a href="#/identity" data-nav="identity">Identity</a>
+          <a href="#/runs" data-nav="runs">Runs</a>
+          <a href="#/overlay" data-nav="overlay">Overlay</a>
+        </nav>
+        <div class="header-end">
+          <div id="asof" class="k"></div>
+          <button type="button" id="theme" class="theme-btn" aria-label="Toggle color theme">Light</button>
+        </div>
+      </div>
+    </header>
+    <main id="app">Loading snapshots…</main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
