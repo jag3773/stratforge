@@ -23,7 +23,7 @@ Nautilus is **historical / archived** (`archive/thin_host_nautilus/`). Paper is 
 | Portfolio CLI | `scripts/run_portfolio_backtest.py` |
 | Stagger CLI | `scripts/staggered_backtest_status.py` |
 | Admission | `scripts/admission/*` → re-exports research replay |
-| Paper node | `strategies/live_node.py` via systemd → `.venv` (REST, not LiveNode) |
+| Paper node | `python -m stratforge.live` (not `strategies/live_node.py`) |
 | Nautilus costume | `archive/thin_host_nautilus/` |
 | Legacy 1.221 harnesses | `archive/strategies_v1_backtest/` |
 | Legacy venv (if present on disk) | `.venv-v1-archived` — do not use |
@@ -79,4 +79,4 @@ uv pip install --python .venv/bin/python -r requirements.txt
 scripts/smoke_check.sh
 ```
 
-See also: [FRESH_VPS_SETUP.md](FRESH_VPS_SETUP.md) · [ARCHITECTURE.md](ARCHITECTURE.md) · [PRODUCTION_BRIEF.md](PRODUCTION_BRIEF.md)
+See also: [ARCHITECTURE.md](ARCHITECTURE.md) · [getting-started.md](getting-started.md) · [PROMOTE.md](PROMOTE.md)

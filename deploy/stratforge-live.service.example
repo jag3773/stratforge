@@ -13,6 +13,7 @@ WorkingDirectory=%h/stratforge
 ExecStart=%h/stratforge/.venv/bin/python -u -m stratforge.live --mode live --config config/live_micro.json
 Restart=on-failure
 RestartSec=30
+Environment=STRATFORGE_STATE=%h/stratforge
 Environment=LIVE_TRADING=true
 Environment=SIMULATION_MODE=false
 EnvironmentFile=-%h/stratforge/.env.live

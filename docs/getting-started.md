@@ -3,77 +3,52 @@
 ## Prerequisites
 
 - Linux with systemd (Debian/Ubuntu amd64 in production)
-- Python **3.13** and [uv](https://docs.astral.sh/uv/)
-- `git`, `curl`
-- Coinbase **public** REST is enough for paper. LIVE needs a view+trade key (no withdraw) in `.env.live` mode 600
+- Python 3.13
+- Coinbase public REST is enough for paper. LIVE needs a view+trade key (no withdraw) in `.env.live`, mode 600
 
 ## Installation
 
 ```bash
-git clone git@github.com:jag3773/stratforge.git
-cd stratforge
-uv venv --python 3.13 .venv
-uv pip install --python .venv/bin/python -r requirements.txt
-scripts/smoke_check.sh
+pip install stratforge
 ```
 
-Do **not** install `nautilus_trader`. `requirements.txt` does not pin it.
+For a checkout, `uv venv --python 3.13 .venv` then `uv pip install -e .`. Do not install `nautilus_trader`.
+
+## State directory
+
+Set `STRATFORGE_STATE` to the directory that holds `config/` and `data/` before the process starts. The approval file, journals, and logs live there, not inside the package. Do not copy `strategies/` or `ccxt_bridge.py` into that directory.
 
 ## First run
 
 ```bash
-mkdir -p data/raw logs
-# copy parquet or: .venv/bin/python -u scripts/download_5m_top50.py
-.venv/bin/python -u strategies/live_node.py --config config/live_paper.json
+export STRATFORGE_STATE=/path/to/state
+mkdir -p "$STRATFORGE_STATE/data/raw" "$STRATFORGE_STATE/logs"
+python -m stratforge.live --config config/live_paper.json
 ```
 
-Expect `[node] requested_mode=paper`, a journal restore line, and `warmed indicators with N historical 4h bars`. Fills wait for the next **completed** 4h close (8pm / midnight / 4am / 8am / noon / 4pm ET; one hour earlier in winter).
+Expect `[node] requested_mode=paper`, a journal restore line, and warmed indicators. Fills wait for the next completed 4h close (8pm / midnight / 4am / 8am / noon / 4pm ET; one hour earlier in winter).
 
-## Common workflows
+Do not run `strategies/live_node.py` from the state directory. That path is not the entry point, and a file sitting there shadows the package.
 
-### Paper status / service
+## Paper status
 
 ```bash
-.venv/bin/python scripts/paper_status.py
+python -m stratforge.live --help
 systemctl --user status pro-trader-paper.service
 ```
 
-### CASH research (production DNA)
-
-```bash
-.venv/bin/python scripts/run_portfolio_backtest.py \
-  --config config/trend_rotation_25_max8_rotate.json \
-  --start 2024-01-01 --end 2026-08-01
-```
-
-### Stagger birth window
-
-```bash
-.venv/bin/python scripts/staggered_backtest_status.py \
-  --start 2026-07-02 --end 2026-08-02 --label m01 \
-  --config config/trend_rotation_25_max8_rotate.json
-```
-
-### Tests
-
-```bash
-.venv/bin/python -m pytest tests/
-scripts/smoke_check.sh   # real host gate
-```
-
-GitHub `ci-lite` runs DNA + `pytest tests/`.
+The paper unit must exec `python -m stratforge.live`. Donch uses `python -m stratforge.paper_family`.
 
 ## Configuration
 
 - `config/trend_rotation_25_max8_rotate.json` — production DNA
 - `config/live_paper.json` — paper overlay (`_include` DNA)
-- `config/live_micro.json` — micro LIVE (`start_usd=250`, clip `$62.50`, daily halt `$25`)
-- `config/universe_live.json` — admitted symbols. Watchlists are not read
-- Halt: `data/TRADING_HALTED` or `data/TRADING_HALTED_{paper,live}`
-- LIVE also needs `LIVE_TRADING=true`, `SIMULATION_MODE=false`, a **new** `data/LIVE_APPROVED`
+- `config/live_micro.json` — example micro LIVE overlay
+- `config/universe_live.json` — admitted symbols
+- Halt: `data/TRADING_HALTED` or `data/TRADING_HALTED_{paper,live}` in the state directory
+- LIVE also needs `LIVE_TRADING=true`, `SIMULATION_MODE=false`, and a `data/LIVE_APPROVED` file in the state directory
 
 ## Next
 
 - [ARCHITECTURE.md](ARCHITECTURE.md)
-- [README.md#module-map](README.md#module-map)
-- [FRESH_VPS_SETUP.md](FRESH_VPS_SETUP.md) · [LIVE_READINESS.md](LIVE_READINESS.md)
+- [PROMOTE.md](PROMOTE.md)
