@@ -9,7 +9,8 @@ import json
 from pathlib import Path
 from typing import Any
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+from stratforge.state import state_root
+
 INCLUDE_KEY = "_include"
 
 # Signal/DNA knobs that belong in the strategy JSON, not live overlays.
@@ -38,7 +39,7 @@ DNA_INCLUDE = "config/trend_rotation_25_max8_rotate.json"
 
 
 def resolve_path(path: str | Path, *, root: Path | None = None) -> Path:
-    base = Path(root) if root is not None else REPO_ROOT
+    base = Path(root) if root is not None else state_root()
     p = Path(path)
     return p if p.is_absolute() else base / p
 
@@ -50,7 +51,7 @@ def load_config(
     _stack: tuple[str, ...] = (),
 ) -> dict[str, Any]:
     """Load JSON, merge `_include` first, then overlay local keys."""
-    base = Path(root) if root is not None else REPO_ROOT
+    base = Path(root) if root is not None else state_root()
     p = resolve_path(path, root=base)
     key = str(p.resolve())
     if key in _stack:

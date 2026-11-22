@@ -10,8 +10,9 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
+from stratforge.state import state_root
 
-ROOT = Path(__file__).resolve().parent
+ROOT = state_root()
 HALT_MODES = ("paper", "live")
 
 

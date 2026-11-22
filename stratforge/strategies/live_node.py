@@ -34,9 +34,10 @@ from strategies.bar_freshness import bar_tradable
 from strategies.bar_apply import apply_engine_bar
 from risk_limits import limits_from_config, is_trading_halted
 import ccxt_bridge
+from stratforge.state import state_root
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.dirname(HERE)
+ROOT = str(state_root())
 DEFAULT_CFG = os.path.join(ROOT, "config", "live_paper.json")
 # Mode-specific health paths. Paper keeps canonical names used by paper_status.
 _NODE_HEALTH_BY_MODE = {
