@@ -2,7 +2,7 @@
 
 [Getting started](getting-started.md) · [Promote](PROMOTE.md)
 
-The process is `python -m stratforge.live`. It does not attach a Nautilus `LiveNode`. Decision code lives in the `stratforge` package (`stratforge/strategies/`, `stratforge/ccxt_bridge.py`, `stratforge/risk_limits.py`). Journals and `data/LIVE_APPROVED` live in `STRATFORGE_STATE`, not beside the package.
+The process is `python -m stratforge.live`. Decision code lives in the `stratforge` package (`stratforge/strategies/`, `stratforge/ccxt_bridge.py`, `stratforge/risk_limits.py`). Journals and `data/LIVE_APPROVED` live in `STRATFORGE_STATE`, not beside the package.
 
 Data enters as Coinbase public 5m candles (parquet at boot, REST after). Closed 4h bars (8pm / midnight / 4am / 8am / noon / 4pm ET) go through `apply_engine_bar` → `SignalEngine` → a journaled executor. Paper never loads API keys. LIVE is the same wiring with `LiveExecutor` + `ccxt_bridge`, and is **halted** until a new `data/LIVE_APPROVED`.
 

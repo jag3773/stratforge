@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
-"""Post-Nautilus operator contract.
+"""Operator docs match the package entry point.
 
-Fail if docs/config/scripts still teach removed node modes or the old runtime.
-Never enables LIVE.
+Fail if docs still teach a removed node mode.
 """
 from __future__ import annotations
 
@@ -12,14 +11,10 @@ ROOT = Path(__file__).resolve().parents[1]
 
 OPERATOR_DOCS = (
     ROOT / "README.md",
-    ROOT / "docs" / "LIVE_READINESS.md",
-    ROOT / "docs" / "PRODUCTION_BRIEF.md",
-    ROOT / "docs" / "FRESH_VPS_SETUP.md",
-    ROOT / "docs" / "PHASE0_V2_RUNTIME.md",
-    ROOT / "docs" / "modules" / "deploy-and-ops.md",
-    ROOT / "docs" / "modules" / "live-node.md",
-    ROOT / "docs" / "diagrams" / "setup.md",
     ROOT / "docs" / "getting-started.md",
+    ROOT / "docs" / "ARCHITECTURE.md",
+    ROOT / "docs" / "PROMOTE.md",
+    ROOT / "docs" / "DATA_AND_PERSISTENCE.md",
 )
 
 
@@ -53,29 +48,26 @@ def test_operator_docs_do_not_claim_venv_v2_alias():
     assert hits == [], "docs claim missing requirements-v2.txt: " + ", ".join(hits)
 
 
-def test_env_example_is_ccxt_paper_or_live():
+def test_env_example_stays_paper():
     text = (ROOT / ".env.example").read_text()
-    assert "paper|live" in text
-    assert "paper|shadow|live" not in text
-    assert "EXECUTION_BACKEND=native_v2" not in text
-    assert "EXECUTION_BACKEND=ccxt" in text
+    assert "LIVE_TRADING=false" in text
+    assert "SIMULATION_MODE=true" in text
+    assert "shadow" not in text
 
 
-def test_paper_status_header_not_nautilus():
+def test_paper_status_header():
     text = (ROOT / "scripts" / "paper_status.py").read_text()
-    assert "Nautilus Paper Trading Status" not in text
     assert "=== Paper Trading Status ===" in text
 
 
 def test_live_node_docstring_modes_match_cli():
-    text = (ROOT / "strategies" / "live_node.py").read_text()
+    text = (ROOT / "stratforge" / "strategies" / "live_node.py").read_text()
     head = text.split('"""', 2)[1]
     assert "SHADOW" not in head
     assert "PAPER" in head and "LIVE" in head
 
 
-def test_ci_runs_real_pytest_not_nautilus_excuse():
-    text = (ROOT / ".github" / "workflows" / "ci-lite.yml").read_text()
-    assert "pip install -r requirements.txt" in text
-    assert "pytest tests/" in text
-    assert "GitHub cannot run Nautilus nightly" not in text
+def test_publish_workflow_has_no_token():
+    text = (ROOT / ".github" / "workflows" / "workflow.yml").read_text()
+    assert "password" not in text.lower()
+    assert "PYPI_TOKEN" not in text

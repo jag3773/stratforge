@@ -4,7 +4,7 @@
   "_include": "config/donch_d20_10.json",
   "start_usd": 500.0,
   "venue": "COINBASE",
-  "runtime": ".venv (ccxt/pandas; Nautilus archived)",
+  "runtime": ".venv",
   "data_source": "direct_public_coinbase_exchange_api_5m_fold_1d",
   "clock": "REST public Coinbase 5m folded to UTC daily. Isolated DailyDataFeed.",
   "fill_model": "simulated_at_bar_close",

@@ -209,7 +209,7 @@ def check_paper_service() -> list[str]:
 
 
 def _production_python() -> Path | None:
-    """Sole runtime: .venv (ccxt/pandas; Nautilus archived)."""
+    """The runtime is the installed package."""
     p = ROOT / ".venv" / "bin" / "python"
     return p if p.is_file() else None
 

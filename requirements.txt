@@ -1,14 +1,5 @@
-# Runtime pins for production + research (.venv) as of 2026-08-22.
-# Install into a Python >=3.12 venv (3.13 preferred):
-#   uv venv --python 3.13 .venv && source .venv/bin/activate
-#   uv pip install -r requirements.txt
-#
-# Sole supported environment. Legacy 1.221 pins live under
-# archive/requirements/requirements-v1-1.221.0.txt (unsupported).
-#
-# NautilusTrader is historical — costume code lives in
-# archive/thin_host_nautilus/. Do not pin or reinstall nautilus_trader
-# for paper/live/research. Host is REST + SignalEngine + ccxt_bridge.
+# Install into a Python 3.13 venv:
+#   uv venv --python 3.13 .venv && uv pip install -r requirements.txt
 
 ccxt>=4.5.0
 requests>=2.32.0
