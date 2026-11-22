@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Stdlib tests: `_include` DNA inherit. Safe on GitHub without Nautilus."""
+"""Stdlib tests: `_include` DNA inherit."""
 from __future__ import annotations
 
 import json

@@ -4,9 +4,9 @@
   "_include": "config/trend_rotation_25_max8_rotate.json",
   "start_usd": 250.0,
   "venue": "COINBASE",
-  "runtime": ".venv (ccxt/pandas; Nautilus archived)",
+  "runtime": ".venv",
   "data_source": "direct_public_coinbase_exchange_api_5m_fold_4h",
-  "clock": "REST public Coinbase 5m folded to 4h. No LiveNode.",
+  "clock": "REST public Coinbase 5m folded to 4h.",
   "fill_model": "simulated_at_bar_close",
   "fee_rate": 0.001,
   "risk": {
@@ -26,6 +26,6 @@
     "halt_mode": "paper",
     "halt_file": "data/TRADING_HALTED_paper"
   },
-  "safety": "PAPER ONLY. No real funds. Simulated fills. LIVE_TRADING must stay false. Restart restores journal book. Runtime is .venv (ccxt/pandas; Nautilus archived). REST is the paper clock. DNA knobs come from _include, not copies. slow_ema_exit_underwater is a paper-only overlay. the live sleeve live_micro.json does not set it.",
+  "safety": "PAPER ONLY. No real funds. Simulated fills. LIVE_TRADING must stay false. Restart restores journal book. DNA knobs come from _include, not copies. slow_ema_exit_underwater is a paper-only overlay. live_micro.json does not set it.",
   "slow_ema_exit_underwater": true
 }

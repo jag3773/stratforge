@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
-"""Assert production DNA knobs match across strategy + resolved live configs.
-
-Stdlib only — safe for GitHub-hosted runners without Nautilus.
-Live overlays must `_include` the strategy JSON and must not recopy DNA knobs.
-"""
+"""Assert production DNA knobs match across strategy and resolved live configs."""
 from __future__ import annotations
 
 import json

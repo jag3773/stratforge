@@ -12,7 +12,7 @@
 pip install stratforge
 ```
 
-For a checkout, `uv venv --python 3.13 .venv` then `uv pip install -e .`. Do not install `nautilus_trader`.
+For a checkout, `uv venv --python 3.13 .venv` then `uv pip install -e .`.
 
 ## State directory
 

@@ -1,21 +1,13 @@
-# CFM isolated research
+# cfm
 
-Long/venue research for Coinbase Financial Markets (CDE perp-style nanos).
-**Not** `trend_rotation_25_max8_rotate`. **Not** the live sleeve. **Not** paper/live.
-Does not import `strategies.*`, `ccxt_bridge`, or `short.*`.
+Isolated research for Coinbase Financial Markets nanos. Not the spot long book. Does not import `strategies`, `ccxt_bridge`, or `short`.
 
-## Run
+- Products: BIP, ETP, SLP, XPP
+- Overnight leverage cap is 4x. Weekday intraday 10x is not used on 4h holds
+- Integer lots. Funding is a debit, never a credit
+- `USE_CFM_FUTURES` on the bridge is a flag, not an adapter
 
+```bash
+python -m stratforge.cfm.test_isolation
+python -m stratforge.cfm.run_research
 ```
-# run from the checkout
-.venv/bin/python cfm/test_isolation.py
-.venv/bin/python cfm/test_ledger.py
-.venv/bin/python cfm/run_research.py
-.venv/bin/python cfm/run_round2.py
-```
-
-Yardstick: `cfm_btc_1x_hold`. Overnight leverage cap **4x** (10x is weekday intraday only).
-Integer nanos (BIP 0.01 BTC). Funding: constant debit, never credited.
-Price proxy: spot 5m→4h. Basis unmodeled.
-
-Start book research default **$1000** (small enough for 1 BIP at overnight IM).

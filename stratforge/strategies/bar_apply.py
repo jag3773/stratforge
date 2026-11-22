@@ -1,4 +1,4 @@
-"""Nautilus-free helper: apply one engine bar through a PaperExecutor."""
+"""Apply one engine bar through a PaperExecutor."""
 from __future__ import annotations
 
 
