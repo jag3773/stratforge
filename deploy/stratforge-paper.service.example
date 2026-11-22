@@ -11,6 +11,7 @@ WorkingDirectory=%h/stratforge
 ExecStart=%h/stratforge/.venv/bin/python -u -m stratforge.live --config config/live_paper.json
 Restart=on-failure
 RestartSec=30
+Environment=STRATFORGE_STATE=%h/stratforge
 Environment=LIVE_TRADING=false
 Environment=SIMULATION_MODE=true
 

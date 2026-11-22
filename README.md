@@ -16,14 +16,32 @@ MIT license. A clone does not trade. Live orders need an API key, a portfolio id
 
 Journals, the candle warehouse, `.env.live`, `data/LIVE_APPROVED`, halt files, viz snapshots, and htpasswd. Do not commit them.
 
-## Run paper
+## Install
+
+The supported run path is the package:
+
+```bash
+pip install stratforge
+```
+
+A development checkout:
 
 ```bash
 git clone git@github.com:jag3773/stratforge.git
 cd stratforge
 uv venv --python 3.13 .venv
-uv pip install -r requirements.txt
-.venv/bin/python -m stratforge.live --config config/live_paper.json
+uv pip install -e .
+```
+
+## State directory
+
+Journals, configs, and `data/LIVE_APPROVED` live in the state directory. Set `STRATFORGE_STATE` to that directory before the process starts. If it is unset and the working directory contains `config/`, that directory is the state directory. Do not put a copy of `strategies/` or `ccxt_bridge.py` in the state directory. It is on `sys.path` and would shadow the package.
+
+## Run paper
+
+```bash
+export STRATFORGE_STATE=/path/to/state
+python -m stratforge.live --config config/live_paper.json
 ```
 
 Paper must not load API keys. `LIVE_TRADING` stays false.

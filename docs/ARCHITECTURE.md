@@ -1,21 +1,21 @@
 # Architecture
 
-[Wiki](README.md) · [Index](INDEX.md) · [Getting started](getting-started.md) · [Setup](diagrams/setup.md)
+[Getting started](getting-started.md) · [Promote](PROMOTE.md)
 
-The host is a thin Python process. It does **not** attach a Nautilus `LiveNode`, `TrendRotationV2Strategy`, or `native_exec_bridge`. Those files sit in `archive/thin_host_nautilus/` and are not imported.
+The process is `python -m stratforge.live`. It does not attach a Nautilus `LiveNode`. Decision code lives in the `stratforge` package (`stratforge/strategies/`, `stratforge/ccxt_bridge.py`, `stratforge/risk_limits.py`). Journals and `data/LIVE_APPROVED` live in `STRATFORGE_STATE`, not beside the package.
 
 Data enters as Coinbase public 5m candles (parquet at boot, REST after). Closed 4h bars (8pm / midnight / 4am / 8am / noon / 4pm ET) go through `apply_engine_bar` → `SignalEngine` → a journaled executor. Paper never loads API keys. LIVE is the same wiring with `LiveExecutor` + `ccxt_bridge`, and is **halted** until a new `data/LIVE_APPROVED`.
 
-The short book (`short/`) does not share this engine, journal, or the live sleeve portfolio. CFM long research is `cfm/` (not this engine, not a rotation port). An isolated **paper soak** for `donch_d20_10` runs on a daily clock (`paper_family_node.py`); it is **not** SSOT and does not share the 4h journal. See [DONCH_PAPER.md](DONCH_PAPER.md).
+The short book (`stratforge/short/`) does not share this engine or journal. CFM long research is `stratforge/cfm/` (not this engine, not a rotation port). An isolated paper soak for `donch_d20_10` runs on a daily clock via `python -m stratforge.paper_family`. It is not SSOT and does not share the 4h journal.
 
 ## Components
 
-- **live_node** — mode gates, lock, seed, health, 4h callback. See [modules/live-node.md](modules/live-node.md).
+- **live_node** — mode gates, lock, seed, health, 4h callback. Code: `stratforge/strategies/live_node.py`.
 - **LiveDataFeed** — public REST 5m fold; only emits completed 4h buckets.
-- **SignalEngine** — decision SSOT. See [modules/signal-engine.md](modules/signal-engine.md).
-- **PaperExecutor / LiveExecutor** — sizing, fees, risk, journal. See [modules/executors.md](modules/executors.md).
-- **research_replay** — same engine + CASH paper, no clock. See [modules/research-replay.md](modules/research-replay.md).
-- **viz** — read-only projector + static site. Journals/health/rollups → `viz/snapshots/`. Not on the money heap. See [../viz/README.md](../viz/README.md).
+- **SignalEngine** — decision SSOT. Code: `stratforge/strategies/signal_engine.py`.
+- **PaperExecutor / LiveExecutor** — sizing, fees, risk, journal. Code: `stratforge/strategies/paper_executor.py`, `stratforge/strategies/live_executor.py`.
+- **research_replay** — same engine + CASH paper, no clock. Code: `stratforge/strategies/research_replay.py`.
+- **viz** — projector in `stratforge/viz/projector.py`. It writes `viz/snapshots/` under the state directory. Snapshots and passwords are not in git.
 
 ## System diagram
 
@@ -34,10 +34,10 @@ flowchart TD
     Ccxt --> CBAT{{Coinbase Advanced Trade}}
 ```
 
-Orchestrator: `strategies/live_node.py`  
-Paper unit: `deploy/pro-trader-paper.service` → `config/live_paper.json`  
-Donch paper soak (not SSOT): `deploy/pro-trader-paper-donch.service` → `config/live_paper_donch.json`  
-LIVE unit: **inactive**. Needs a new `LIVE_APPROVED`.
+Entry point: `python -m stratforge.live`  
+Paper unit example: `deploy/stratforge-paper.service.example` → `config/live_paper.json`  
+Donch paper soak (not SSOT): `python -m stratforge.paper_family` → `config/live_paper_donch.json`  
+LIVE is off until `data/LIVE_APPROVED` exists in the state directory. See [PROMOTE.md](PROMOTE.md).
 
 ## Mode matrix
 
@@ -50,11 +50,11 @@ Dry-run `LiveExecutor` remains in unit tests only. There is no node mode for it.
 
 ## Data flow
 
-1. **Boot seed** — last ~15k 5m rows → 4h → `engine.on_bar(..., emit=False)` — [`live_data_feed.py`](../strategies/live_data_feed.py)
-2. **Journal restore + slot sync** — [`paper_executor.py`](../strategies/paper_executor.py) / [`live_executor.py`](../strategies/live_executor.py)
-3. **LIVE only: reconcile** — [`live_reconcile.py`](../strategies/live_reconcile.py). Boot, each 4h wave, **before every BUY**, and **before every CLOSE**. Healthy fetch is venue SSOT: extra USD → `CASH_DEPOSIT`, missing USD → `CASH_WITHDRAW`, lot drift → `BOOK_SYNC`. Wallet `available_balance` overlays rounded portfolio crypto lots. Failed fetch does not adopt. Clip = `equity × max_alloc_pct` (0.25). Dollar clip/book caps are off (`0`). Daily halt is **10%** of day-start equity. `min_notional_usd=5` only. **LIVE orders:** IOC limit at ask after spread/chase gates (`buy_protect`); no unbounded market buy. Close never sells above wallet available.
-4. **Poll 5m, emit closed 4h** — [`live_data_feed.py`](../strategies/live_data_feed.py)
-5. **Apply** — [`bar_apply.py`](../strategies/bar_apply.py) → engine → executor
+1. **Boot seed** — last ~15k 5m rows → 4h → `engine.on_bar(..., emit=False)` — `stratforge/strategies/live_data_feed.py`
+2. **Journal restore + slot sync** — `stratforge/strategies/paper_executor.py` / `stratforge/strategies/live_executor.py`
+3. **LIVE only: reconcile** — `stratforge/strategies/live_reconcile.py`. Boot, each 4h wave, **before every BUY**, and **before every CLOSE**. Healthy fetch is venue SSOT: extra USD → `CASH_DEPOSIT`, missing USD → `CASH_WITHDRAW`, lot drift → `BOOK_SYNC`. Wallet `available_balance` overlays rounded portfolio crypto lots. Failed fetch does not adopt. Clip = `equity × max_alloc_pct` (0.25). Dollar clip/book caps are off (`0`). Daily halt is **10%** of day-start equity. `min_notional_usd=5` only. **LIVE orders:** IOC limit at ask after spread/chase gates (`buy_protect`); no unbounded market buy. Close never sells above wallet available.
+4. **Poll 5m, emit closed 4h** — `stratforge/strategies/live_data_feed.py`
+5. **Apply** — `stratforge/strategies/bar_apply.py` → engine → executor
 6. **Health** — `data/node_health.json` (+ `_live` twin when LIVE is on)
 
 ## SSOT
@@ -77,4 +77,4 @@ Dry-run `LiveExecutor` remains in unit tests only. There is no node mode for it.
 - **Executors own money.** Engine emits `{type, symbol, reason}`; sizing/fees/halt live in the executor.
 - **Rotation ≠ `max_concurrent`.** Need `rotate_when_full` + min-hold + underwater-only + `_long_slots`.
 - **CASH only** for production research. Rejected: defensive max4 stack, hybrid LS as main DNA.
-- **Root modules stay put.** `live_node` imports `risk_limits` and `ccxt_bridge` from repo root.
+- **Package owns the code.** `ccxt_bridge` and `risk_limits` live in the `stratforge` package. A copy in the state directory shadows the install.
