@@ -10,7 +10,9 @@ import json
 import os
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+from stratforge.state import state_root
+
+ROOT = state_root()
 LIVE_PATH = ROOT / "config" / "universe_live.json"
 
 # Hard fallback if JSON missing (bootstrap safety; promote path keeps JSON current).

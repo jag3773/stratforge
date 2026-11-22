@@ -35,8 +35,9 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
+from stratforge.state import state_root
+
+ROOT = state_root()
 
 from risk_limits import RiskLimits, check_order, limits_from_config, load_limits_from_env, is_trading_halted, raise_total_notional_for_contributed, clip_target_usd, effective_daily_loss_halt
 import ccxt_bridge

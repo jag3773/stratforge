@@ -23,9 +23,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from stratforge.state import state_root
+
 logger = logging.getLogger("ccxt_bridge")
 
-ROOT = Path(__file__).resolve().parent
+ROOT = state_root()
 DEFAULT_JOURNAL = ROOT / "data" / "execution_log_bridge.jsonl"
 DEFAULT_APPROVAL = ROOT / "data" / "LIVE_APPROVED"
 

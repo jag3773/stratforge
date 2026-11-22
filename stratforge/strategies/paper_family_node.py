@@ -26,8 +26,10 @@ from strategies.paper_executor import PaperExecutor
 from strategies.research_families import FamilyEngine
 from strategies.universe import load_live_universe
 
+from stratforge.state import state_root
+
 HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.dirname(HERE)
+ROOT = str(state_root())
 DEFAULT_CFG = os.path.join(ROOT, "config", "live_paper_donch.json")
 UNIVERSE = load_live_universe()
 # Daily close + 50-symbol slow poll: allow 45 min lag vs 4h paper's 20 min.

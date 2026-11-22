@@ -12,9 +12,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-_ROOT = Path(__file__).resolve().parents[1]
-if str(_ROOT) not in sys.path:
-    sys.path.insert(0, str(_ROOT))
+from stratforge.state import state_root
+
+_ROOT = state_root()
 
 from strategies.config_load import DNA_KEYS, load_config
 from strategies.display_time import format_et

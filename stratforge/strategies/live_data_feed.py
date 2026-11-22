@@ -20,8 +20,10 @@ from typing import Callable
 import pandas as pd
 import requests
 
+from stratforge.state import state_root
+
 HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.dirname(HERE)
+ROOT = str(state_root())
 RAW_DIR = os.path.join(ROOT, "data", "raw")
 HEALTH_PATH = os.path.join(ROOT, "data", "feed_health.json")
 POLL_SLEEP = float(os.getenv("FEED_POLL_SLEEP", "2"))
