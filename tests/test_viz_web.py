@@ -1,7 +1,7 @@
 """Viz web: GET-only boundary."""
 from pathlib import Path
 
-WEB = Path(__file__).resolve().parents[1] / "viz" / "web"
+WEB = Path(__file__).resolve().parents[1] / "stratforge" / "viz" / "web"
 
 
 def test_fetch_lives_only_in_load_ts():

@@ -81,7 +81,7 @@ def test_hot_path_does_not_import_nautilus():
 
 
 def test_live_node_has_no_native_run_foreground():
-    text = (ROOT / "strategies" / "live_node.py").read_text()
+    text = (ROOT / "stratforge" / "strategies" / "live_node.py").read_text()
     assert "native_exec_bridge" not in text
     assert "run_foreground" not in text
 
@@ -100,7 +100,7 @@ def test_archived_nautilus_costume_not_importable_from_repo_root():
 
 
 def test_live_node_has_no_native_health_hooks():
-    text = (ROOT / "strategies" / "live_node.py").read_text()
+    text = (ROOT / "stratforge" / "strategies" / "live_node.py").read_text()
     assert "native_livenode_bars" not in text
     assert "NATIVE_LIVENODE_BARS" not in text
     assert "build_strategy_adapter" not in text
@@ -110,7 +110,7 @@ def test_live_node_has_no_native_health_hooks():
 def test_ccxt_bridge_venue_symbol_not_nautilus_named():
     import ccxt_bridge
 
-    text = (ROOT / "ccxt_bridge.py").read_text()
+    text = (ROOT / "stratforge" / "ccxt_bridge.py").read_text()
     assert "to_nautilus_symbol" not in text
     assert ccxt_bridge.to_venue_symbol("BTC/USD") == "BTC-USD"
     assert ccxt_bridge.to_venue_symbol("eth-usd") == "ETH-USD"
@@ -120,18 +120,12 @@ def test_nautilus_catalog_helpers_removed():
     assert not (ROOT / "scripts" / "wrangle_to_nautilus.py").exists()
     assert not (ROOT / "scripts" / "wrangle_5m.py").exists()
     assert not (ROOT / "deploy" / "logrotate-nautilus").exists()
-    rotate = ROOT / "deploy" / "logrotate-pro-trader"
-    assert rotate.exists()
-    body = rotate.read_text()
-    assert "live_paper.log" in body
-    assert "live_real.log" in body
-    wrapper = (ROOT / "deploy" / "hermes-cron-wrappers" / "rotate_logs.sh").read_text()
-    assert "logrotate-pro-trader" in wrapper
-    assert "logrotate-nautilus" not in wrapper
+    assert not (ROOT / "deploy" / "logrotate-pro-trader").exists()
+    assert not (ROOT / "deploy" / "hermes-cron-wrappers" / "rotate_logs.sh").exists()
 
 
 def test_live_node_has_no_shadow_mode():
-    text = (ROOT / "strategies" / "live_node.py").read_text()
+    text = (ROOT / "stratforge" / "strategies" / "live_node.py").read_text()
     assert "--mode shadow" not in text
     assert 'choices=["paper", "shadow", "live"]' not in text
     assert "execution_log_shadow" not in text

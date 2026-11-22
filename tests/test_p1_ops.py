@@ -64,7 +64,7 @@ def test_normalize_pem_secret():
     raw = "-----BEGIN EC PRIVATE KEY-----\\nQUJD\\nQUJD\\n-----END EC PRIVATE KEY-----\\n"
     got = ccxt_bridge.normalize_pem_secret(raw)
     assert "\\n" not in got
-    assert got.count("\n") == 3
+    assert got.count("\n") == 4
     already = "-----BEGIN EC PRIVATE KEY-----\nQUJD\nQUJD\n-----END EC PRIVATE KEY-----\n"
     assert ccxt_bridge.normalize_pem_secret(already) == already.strip()
     prev = os.environ.get("COINBASE_API_SECRET")

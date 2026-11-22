@@ -13,6 +13,7 @@ from pathlib import Path
 
 ROOT = Path(os.environ.get("NAUTILUS_ROOT", Path(__file__).resolve().parents[1]))
 FEED_MAX_AGE_SEC = float(os.environ.get("HEALTH_MAX_AGE_SEC", 20 * 60))
+DONCH_DAILY_CLOSE_MAX_AGE_SEC = 26 * 3600
 
 
 def _age(iso: str | None, *, now: datetime | None = None) -> float | None:
@@ -126,10 +127,6 @@ def _donch_daily_close_msgs(root: Path, now: datetime | None = None) -> list[str
     path = root / "data" / "feed_health_donch.json"
     if not path.is_file():
         return []
-    try:
-        from scripts.feed_health_check import DONCH_DAILY_CLOSE_MAX_AGE_SEC
-    except ImportError:
-        from feed_health_check import DONCH_DAILY_CLOSE_MAX_AGE_SEC
     try:
         data = json.loads(path.read_text())
     except Exception as e:

@@ -224,6 +224,12 @@ def run_tests() -> list[str]:
         "tests/test_thin_host_cutover.py",
         "tests/test_phase2_execution.py",
         "tests/test_p0_live_safety.py",
+        "tests/test_paper_executor.py",
+        "tests/test_signal_parity.py",
+        "tests/test_live_reconcile_parse.py",
+        "tests/test_p1_ops.py",
+        "tests/test_chaos_journal.py",
+        "tests/test_admission.py",
     )
     r = subprocess.run(
         [str(py), "-m", "pytest", *pytest_files, "-q"],
@@ -240,26 +246,6 @@ def run_tests() -> list[str]:
         )
     else:
         _ok(" ".join(pytest_files))
-    for script in (
-        "scripts/test_paper_executor.py",
-        "scripts/test_signal_parity.py",
-        "scripts/test_live_reconcile_parse.py",
-        "scripts/test_p1_ops.py",
-        "scripts/test_chaos_journal.py",
-        "scripts/test_admission.py",
-    ):
-        r = subprocess.run(
-            [str(py), str(ROOT / script)],
-            cwd=str(ROOT),
-            capture_output=True,
-            text=True,
-            timeout=120,
-            env={**os.environ, "LIVE_TRADING": "false", "SIMULATION_MODE": "true"},
-        )
-        if r.returncode != 0:
-            errs.append(f"{script} failed rc={r.returncode}: {(r.stdout or r.stderr)[-300:]}")
-        else:
-            _ok(script)
     return errs
 
 

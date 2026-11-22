@@ -8,6 +8,5 @@
 | `staggered_backtest_status.py` | Path-dependence replay |
 | `run_portfolio_backtest.py` | One-window CASH replay |
 | `validate_dna.py` | Production DNA lock |
-| `admission/` | Gates before a symbol is added to `universe_live.json` |
 
 Run them with `STRATFORGE_STATE` set, from a venv that has the package installed.

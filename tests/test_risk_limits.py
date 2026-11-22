@@ -90,10 +90,12 @@ def test_mode_halt_isolation_and_global_panic():
 
 
 def test_relative_halt_file_resolves_to_repo_root():
+    from stratforge.state import state_root
+
     p = resolve_halt_path("data/TRADING_HALTED_paper")
     assert p.is_absolute()
     assert p.name == "TRADING_HALTED_paper"
-    assert "pro-trader" in str(p)
+    assert p == (state_root() / "data" / "TRADING_HALTED_paper").resolve()
 
 
 def test_micro_mtm_headroom_allows_fourth_clip():

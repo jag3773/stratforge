@@ -107,7 +107,7 @@ def test_health_path_required():
 
 
 def test_live_node_does_not_import_donch():
-    text = (ROOT / "strategies" / "live_node.py").read_text()
+    text = (ROOT / "stratforge" / "strategies" / "live_node.py").read_text()
     assert "research_families" not in text
     assert "paper_family_node" not in text
     assert "daily_data_feed" not in text
@@ -116,10 +116,11 @@ def test_live_node_does_not_import_donch():
 
 
 def test_ssot_paper_unit_untouched():
-    unit = (ROOT / "deploy" / "pro-trader-paper.service").read_text()
+    unit = (ROOT / "deploy" / "stratforge-paper.service.example").read_text()
     assert "live_paper.json" in unit
     assert "donch" not in unit.lower()
-    assert "paper_family_node" not in unit
+    assert "paper_family" not in unit
+    assert "-m stratforge.live" in unit
     paper_cfg = (ROOT / "config" / "live_paper.json").read_text()
     assert "trend_rotation_25_max8_rotate" in paper_cfg
     assert "donch" not in paper_cfg
@@ -178,7 +179,7 @@ def test_feed_health_ignores_missing_donch(tmp_path: Path):
     import json
     from datetime import datetime, timezone
 
-    from scripts.feed_health_check import collect_errors
+    from scripts.ops_watchdog import collect_watchdog_messages
 
     data = tmp_path / "data"
     data.mkdir()
@@ -186,11 +187,9 @@ def test_feed_health_ignores_missing_donch(tmp_path: Path):
     (data / "feed_health.json").write_text(
         json.dumps({"ts": now, "cycle": 5, "fetch_ok": 10, "bars_emitted": 1})
     )
-    (data / "node_health.json").write_text(
-        json.dumps({"ts": now, "started_at": now, "bars_seen": 1, "equity": 500})
-    )
-    assert collect_errors(tmp_path) == []
-    print("ok feed_health skips absent donch")
+    msgs = collect_watchdog_messages(tmp_path, [])
+    assert msgs == []
+    assert not (data / "feed_health_donch.json").exists()
 
 
 def test_donch_status_paths_isolated():
