@@ -29,14 +29,20 @@ def _age(iso: str | None, *, now: datetime | None = None) -> float | None:
         return None
 
 
+def _book_line(ln: str) -> bool:
+    if "pgrep" in ln or "hermes-snap" in ln:
+        return False
+    # Entry is `python -m stratforge.live`. `live_node.py` is the old script path.
+    # `stratforge.paper_family` is the donch soak, not this check.
+    return "-m stratforge.live" in ln or "live_node.py" in ln
+
+
 def classify_live_node_lines(lines: list[str]) -> dict[str, list[str]]:
     paper: list[str] = []
     live: list[str] = []
     unexpected: list[str] = []
     for ln in lines:
-        if "live_node.py" not in ln:
-            continue
-        if "pgrep" in ln or "hermes-snap" in ln:
+        if not _book_line(ln):
             continue
         if "--mode shadow" in ln:
             unexpected.append(ln)
@@ -70,15 +76,15 @@ def collect_watchdog_messages(
     msgs: list[str] = []
     classified = classify_live_node_lines(proc_lines)
     if len(classified["paper"]) > 1:
-        msgs.append(f"duplicate paper live_node PIDs={len(classified['paper'])}")
+        msgs.append(f"duplicate paper stratforge.live PIDs={len(classified['paper'])}")
     if classified["unexpected"]:
-        msgs.append(f"unexpected shadow live_node PIDs={len(classified['unexpected'])}")
+        msgs.append(f"unexpected shadow PIDs={len(classified['unexpected'])}")
     if len(classified["live"]) > 1:
-        msgs.append(f"duplicate LIVE live_node PIDs={len(classified['live'])}")
+        msgs.append(f"duplicate LIVE stratforge.live PIDs={len(classified['live'])}")
 
     approved = (root / "data" / "LIVE_APPROVED").is_file()
     if approved and len(classified["live"]) == 0:
-        msgs.append("LIVE authorized but no live_node PID")
+        msgs.append("LIVE authorized but no stratforge.live PID")
 
     halt_msgs = []
     for name in (
@@ -145,7 +151,11 @@ def _donch_daily_close_msgs(root: Path, now: datetime | None = None) -> list[str
 
 def main() -> int:
     try:
-        r = subprocess.run(["pgrep", "-af", "live_node.py"], capture_output=True, text=True)
+        r = subprocess.run(
+            ["pgrep", "-af", "stratforge.live|live_node.py"],
+            capture_output=True,
+            text=True,
+        )
         proc_lines = (r.stdout or "").splitlines()
     except Exception as e:
         print("OPS WATCHDOG")
