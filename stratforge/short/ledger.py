@@ -158,14 +158,11 @@ class ShortLedger:
         if px <= 0 or target_notional <= 0:
             return 0.0
         avail = self.available()
-        # 1x: margin == notional; cannot use more than available after fee
-        fee_pad = 1.0 + float(self.fee_rate)
-        max_notional = max(0.0, avail / fee_pad)
+        lev = max(float(self.max_leverage), 1.0)
+        fee_rate = float(self.fee_rate)
+        denom = (1.0 / lev) + fee_rate
+        max_notional = max(0.0, avail / denom) if denom > 0 else 0.0
         notional = min(float(target_notional), max_notional)
-        if self.max_leverage > 0:
-            # margin = notional / leverage
-            max_by_lev = avail * float(self.max_leverage) / fee_pad
-            notional = min(notional, max_by_lev)
         qty = notional / px
         if self.integer_contracts:
             mult = CONTRACTS.get(symbol.upper())
@@ -188,9 +185,7 @@ class ShortLedger:
         notional = qty * px
         fee = notional * float(self.fee_rate)
         margin = notional / max(float(self.max_leverage), 1e-9)
-        if fee + 1e-9 > self.cash:
-            return None
-        if margin > self.available() + 1e-6:
+        if fee + margin > self.available() + 1e-6 or fee + 1e-9 > self.cash:
             return None
         self.cash -= fee
         self.fees_paid += fee

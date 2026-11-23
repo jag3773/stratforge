@@ -15,6 +15,39 @@ from cfm.ledger import FuturesLedger
 from cfm.strats import Intent
 from cfm.venue import cde_multipliers, load_venue, multiplier
 
+def merge_intents(prev: list[Intent], new: list[Intent]) -> list[Intent]:
+    """Keep earlier symbols when a strategy emits deltas, not a full book."""
+    by_sym = {it.symbol: it for it in prev}
+    for it in new:
+        by_sym[it.symbol] = it
+    return list(by_sym.values())
+
+
+def note_ledger_closed(strategy, symbols: set[str]) -> None:
+    """Clear internal position flags when the ledger closed those names intra-bar."""
+    if not symbols:
+        return
+    note = getattr(strategy, "note_closed", None)
+    if note is not None:
+        note(symbols)
+        return
+    closed = {s.upper() for s in symbols}
+    last = getattr(strategy, "_last", None)
+    if isinstance(last, str) and "BTC" in closed:
+        strategy._last = "FLAT"
+    elif isinstance(last, dict):
+        for s in closed:
+            if s in last:
+                last[s] = "FLAT"
+    side = getattr(strategy, "_side", None)
+    if isinstance(side, dict):
+        sent = getattr(strategy, "_last_sent", None)
+        for s in closed:
+            if s in side:
+                side[s] = "FLAT"
+            if isinstance(sent, dict) and s in sent:
+                sent[s] = "FLAT"
+
 
 def _align(bar_map: dict[str, list[dict]]) -> list[tuple[int, dict[str, dict]]]:
     """Union of timestamps → {sym: bar}."""
@@ -115,9 +148,11 @@ def run_replay(
             ledger.update_price(sym, float(b["close"]), ts)
         if ts >= trade_start_ns:
             ledger.apply_funding(ts)
+            before = set(ledger.lots)
             for sym, b in row.items():
                 ledger.maybe_liquidate_bar(sym, float(b["high"]), float(b["low"]), ts)
                 ledger.maybe_stop_bar(sym, float(b["high"]), float(b["low"]), ts)
+            note_ledger_closed(strategy, before - set(ledger.lots))
             if not live_started:
                 pending = list(last_intents)
                 live_started = True
@@ -153,7 +188,7 @@ def run_replay(
         lows = {sym: float(b["low"]) for sym, b in row.items()}
         intents = strategy.on_close(ts, closes, highs, lows)
         if intents:
-            last_intents = intents
+            last_intents = merge_intents(last_intents, intents)
             if ts >= trade_start_ns:
                 pending = intents
                 lag_left = int(signal_lag_bars)
