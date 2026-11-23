@@ -14,4 +14,4 @@ if _PKG in sys.path:
     sys.path.remove(_PKG)
 sys.path.insert(0, _PKG)
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
