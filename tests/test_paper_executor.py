@@ -307,6 +307,36 @@ def test_real_risk_deny_still_journaled():
         assert "RISK_DENY" in text, text
 
 
+def test_paper_buy_enforces_daily_loss_halt_pct():
+    from risk_limits import RiskLimits
+    from strategies.day_risk import utc_today
+
+    with tempfile.TemporaryDirectory() as td:
+        j = os.path.join(td, "j.jsonl")
+        ex = PaperExecutor(
+            start_usd=1000.0,
+            max_alloc_pct=0.25,
+            journal_path=j,
+            fee_rate=0.001,
+            limits=RiskLimits(
+                min_notional_usd=5.0,
+                daily_loss_halt_usd=0.0,
+                daily_loss_halt_pct=0.10,
+                halt_file=os.path.join(td, "no-halt"),
+            ),
+        )
+        ex.day.day_utc = utc_today()
+        ex.day.day_start_equity = 1000.0
+        ex.cash = 850.0
+
+        ex.update_price("BTC", 100.0)
+        ex.apply([{"type": "BUY", "symbol": "BTC", "price": 100.0, "reason": "t"}])
+        assert "BTC" not in ex.positions
+        text = open(j).read()
+        assert "RISK_DENY" in text, text
+        assert "hit halt $100.00" in text, text
+
+
 if __name__ == "__main__":
     test_buy_debits_notional_and_fee()
     print("ok buy")
@@ -328,4 +358,6 @@ if __name__ == "__main__":
     print("ok dust deny silent")
     test_real_risk_deny_still_journaled()
     print("ok real deny journaled")
+    test_paper_buy_enforces_daily_loss_halt_pct()
+    print("ok paper daily loss halt pct")
     print("ALL PASS")

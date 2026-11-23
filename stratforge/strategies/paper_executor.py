@@ -393,6 +393,7 @@ class PaperExecutor:
                     equity=eq,
                     is_close=False,
                     limits=self.limits,
+                    day_start_equity=self.day.day_start_equity,
                 )
                 if not risk.approved:
                     # A buy under min notional is residual cash, not a broken
