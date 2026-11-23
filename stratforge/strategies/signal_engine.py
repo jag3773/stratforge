@@ -232,6 +232,7 @@ class SignalConfig:
     adx_threshold: float = 20.0
     atr_period: int = 14
     atr_stop_mult: float = 0.0
+    atr_tp_mult: float = 2.0
     cooldown_bars: int = 2
     use_adx_filter: bool = False
     trend_filter: bool = True
@@ -265,6 +266,7 @@ class SignalConfig:
             adx_threshold=float(cfg.get("adx_threshold", 20.0)),
             atr_period=int(cfg.get("atr_period", 14)),
             atr_stop_mult=float(cfg.get("atr_stop_mult", 0.0)),
+            atr_tp_mult=float(cfg.get("atr_tp_mult", 2.0)),
             cooldown_bars=int(cfg.get("cooldown_bars", 2)),
             use_adx_filter=bool(cfg.get("use_adx_filter", False)),
             trend_filter=bool(cfg.get("trend_filter", True)),

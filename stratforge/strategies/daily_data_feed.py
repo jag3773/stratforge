@@ -217,16 +217,20 @@ class DailyDataFeed:
         wall = int(time.time() * 1000) if now_ms is None else int(now_ms)
         for row in ohlcv:
             ts_ms, o, h, l, c, v = row[0], row[1], row[2], row[3], row[4], row[5]
-            bucket = _floor_day_ms(int(ts_ms))
+            ts_ms = int(ts_ms)
+            bucket = _floor_day_ms(ts_ms)
             if bucket > wall:
                 continue
             cur = self._cur.get(symbol)
             if cur is not None and cur["bucket"] == bucket:
+                if ts_ms <= cur["last_5m_ts"]:
+                    continue
                 b = cur["bar"]
                 b["high"] = max(b["high"], float(h))
                 b["low"] = min(b["low"], float(l))
                 b["close"] = float(c)
                 b["volume"] += float(v)
+                cur["last_5m_ts"] = ts_ms
                 continue
             if cur is not None:
                 if bucket < cur["bucket"]:
@@ -246,6 +250,7 @@ class DailyDataFeed:
                 self._queue(symbol, bar, reason="bucket-cross")
             self._cur[symbol] = {
                 "bucket": bucket,
+                "last_5m_ts": ts_ms,
                 "bar": {
                     "ts": bar_ts_ns_from_bucket_ms(bucket),
                     "open": float(o),
