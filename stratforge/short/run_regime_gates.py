@@ -12,8 +12,9 @@ import json
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
+_PKG = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(_PKG))
+from stratforge.state import state_root  # noqa: E402
 
 from short.run_backtest import run_one  # noqa: E402
 
@@ -94,7 +95,7 @@ def main() -> int:
             for cfg, rows in by_cfg.items()
         },
     }
-    out_path = ROOT / "results" / "backtests" / "short" / "regime_gate_compare.json"
+    out_path = state_root() / "results" / "backtests" / "short" / "regime_gate_compare.json"
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(payload, indent=2))
     print(f"Wrote {out_path}")

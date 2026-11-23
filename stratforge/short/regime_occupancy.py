@@ -10,8 +10,9 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
+_PKG = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(_PKG))
+from stratforge.state import state_root  # noqa: E402
 from short.replay import load_4h_bars  # noqa: E402
 
 WINDOWS = [
@@ -29,6 +30,8 @@ def _iso(ts_ns: int) -> str:
 
 def build() -> pd.DataFrame:
     bars = load_4h_bars("BTC", start="2019-01-01", end="2026-08-13")
+    if not bars:
+        return pd.DataFrame()
     df = pd.DataFrame(bars)
     df["dt"] = pd.to_datetime(df["ts"], unit="ns", utc=True)
     df = df.set_index("dt").sort_index()
@@ -142,7 +145,7 @@ def main() -> int:
             d = row[g]
             bits.append(f"{d['frac']:.0%}/{d['flips']}/{d['btc_in']:+.0f}")
         print(" ".join(f"{b:>10}" if i else b for i, b in enumerate(bits)))
-    out = ROOT / "results" / "backtests" / "short" / "regime_occupancy.json"
+    out = state_root() / "results" / "backtests" / "short" / "regime_occupancy.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     # json-friendly
     import json

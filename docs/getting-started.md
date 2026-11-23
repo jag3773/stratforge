@@ -34,7 +34,7 @@ Do not run `strategies/live_node.py` from the state directory. That path is not 
 
 ```bash
 python -m stratforge.live --help
-systemctl --user status pro-trader-paper.service
+systemctl --user status stratforge-paper.service
 ```
 
 The paper unit must exec `python -m stratforge.live`. Donch uses `python -m stratforge.paper_family`.

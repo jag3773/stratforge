@@ -19,6 +19,7 @@ ROOT = Path(
 if str(ROOT) not in __import__("sys").path:
     __import__("sys").path.insert(0, str(ROOT))
 
+import stratforge  # noqa: E402
 from strategies.display_time import date_et, format_et  # noqa: E402
 
 NO_DAY_MARK = "no day mark yet"

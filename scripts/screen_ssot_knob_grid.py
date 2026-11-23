@@ -18,6 +18,7 @@ sys.path.insert(0, str(ROOT))
 
 from dateutil.relativedelta import relativedelta  # noqa: E402
 
+import stratforge  # noqa: E402
 from strategies.research_replay import (  # noqa: E402
     load_4h_bars,
     load_strategy_cfg,

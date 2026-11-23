@@ -10,13 +10,14 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
+_PKG = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(_PKG))
+from stratforge.state import state_root  # noqa: E402
 
 from cfm.replay import run_replay, write_json
 from cfm.strats import DonchianTurtle, EmaRegimeLev, Hold1x, MonthlySma, VolTargetLong, WeeklySma
 
-OUT = ROOT / "results" / "backtests" / "cfm" / "cde_tape"
+OUT = state_root() / "results" / "backtests" / "cfm" / "cde_tape"
 START = "2025-07-19"
 END = "2026-08-27"
 KW = dict(

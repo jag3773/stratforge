@@ -20,6 +20,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+import stratforge  # noqa: E402,F401
 
 PROD_DNA = {
     "strategy_id": "trend_rotation_25_max8_rotate",
@@ -179,16 +180,16 @@ def check_paper_service() -> list[str]:
     errs = []
     try:
         r = subprocess.run(
-            ["systemctl", "--user", "is-active", "pro-trader-paper.service"],
+            ["systemctl", "--user", "is-active", "stratforge-paper.service"],
             capture_output=True,
             text=True,
             timeout=10,
         )
         state = (r.stdout or r.stderr or "").strip()
         if state != "active":
-            errs.append(f"pro-trader-paper.service state={state!r}")
+            errs.append(f"stratforge-paper.service state={state!r}")
         else:
-            _ok("pro-trader-paper.service active")
+            _ok("stratforge-paper.service active")
     except Exception as e:
         errs.append(f"systemctl check failed: {e}")
 

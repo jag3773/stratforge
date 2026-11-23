@@ -19,8 +19,14 @@ WINDOWS = [
 
 def main() -> int:
     df = build()
+    if df.empty:
+        print("no 4h bars")
+        return 0
     for start, end, label in WINDOWS:
         sl = df.loc[start:end]
+        if sl.empty or "close" not in sl.columns:
+            print(f"\n=== {label} no bars ===")
+            continue
         print(
             f"\n=== {label} BTC {sl.close.iloc[0]:.0f}->{sl.close.iloc[-1]:.0f} ==="
         )

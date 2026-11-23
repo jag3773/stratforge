@@ -17,16 +17,21 @@ import pandas as pd
 
 from short.engine import BearConfig, BearRegimeEngine
 from short.ledger import ShortLedger
+from stratforge.state import state_root
 
-ROOT = Path(__file__).resolve().parents[1]
-RAW_DIR = ROOT / "data" / "raw"
-DEFAULT_CFG = ROOT / "config" / "short" / "bear_regime_cover.json"
+
+def default_raw_dir() -> Path:
+    return state_root() / "data" / "raw"
+
+
+def default_cfg() -> Path:
+    return state_root() / "config" / "short" / "bear_regime_cover.json"
 
 
 def load_cfg(path: str | Path | None = None) -> dict:
-    p = Path(path) if path else DEFAULT_CFG
+    p = Path(path) if path else default_cfg()
     if not p.is_absolute():
-        p = ROOT / p
+        p = state_root() / p
     raw = json.loads(p.read_text())
     cfg = {k: v for k, v in raw.items() if not str(k).startswith("_") and k != "comment"}
     cfg["_config_path"] = str(p)
@@ -45,9 +50,9 @@ def load_4h_bars(
     symbol: str,
     start: str | datetime | None = None,
     end: str | datetime | None = None,
-    raw_dir: Path = RAW_DIR,
+    raw_dir: Path | None = None,
 ) -> list[dict]:
-    path = raw_dir / f"{symbol.upper()}_USD_5m.parquet"
+    path = (raw_dir or default_raw_dir()) / f"{symbol.upper()}_USD_5m.parquet"
     if not path.is_file():
         return []
     df = pd.read_parquet(path)
@@ -241,7 +246,7 @@ def run_short_replay(
     data_start = warmup_start(trade_start_dt, raw_cfg) if trade_start_dt else None
     trade_start_ns = int(trade_start_dt.timestamp() * 1e9) if trade_start_dt else None
 
-    raw = Path(raw_dir) if raw_dir else RAW_DIR
+    raw = Path(raw_dir) if raw_dir else default_raw_dir()
     per: dict[str, list[dict]] = {}
     for s in syms:
         bars = load_4h_bars(s, start=data_start, end=trade_end_dt, raw_dir=raw)
@@ -353,7 +358,7 @@ def run_short_replay(
 
 
 def btc_buyhold(start_usd: float, start: str, end: str, raw_dir: Path | None = None) -> tuple[float, float]:
-    bars = load_4h_bars("BTC", start=start, end=end, raw_dir=raw_dir or RAW_DIR)
+    bars = load_4h_bars("BTC", start=start, end=end, raw_dir=raw_dir)
     if len(bars) < 2:
         return start_usd, 0.0
     ret = bars[-1]["close"] / bars[0]["close"] - 1.0
@@ -370,7 +375,7 @@ def btc_short_hold(
     raw_dir: Path | None = None,
 ) -> dict:
     """Always-short BTC 1x from first trade bar to last. Benchmark, not a candidate."""
-    bars = load_4h_bars("BTC", start=start, end=end, raw_dir=raw_dir or RAW_DIR)
+    bars = load_4h_bars("BTC", start=start, end=end, raw_dir=raw_dir)
     if len(bars) < 2:
         return {"end_equity": start_usd, "return_pct": 0.0, "funding_paid": 0.0, "fees_paid": 0.0}
     led = ShortLedger(start_usd=start_usd, fee_rate=fee_rate, funding_per_8h=funding_per_8h, max_leverage=1.0)

@@ -26,6 +26,7 @@ import requests
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
+import stratforge  # noqa: E402
 from strategies.display_time import format_et  # noqa: E402
 RAW_DIR = os.path.join(ROOT, "data", "raw")
 TF = "5m"

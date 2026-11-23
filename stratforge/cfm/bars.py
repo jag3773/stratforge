@@ -8,9 +8,15 @@ from pathlib import Path
 
 import pandas as pd
 
-ROOT = Path(__file__).resolve().parents[1]
-RAW_DIR = ROOT / "data" / "raw"
-CFM_DIR = ROOT / "data" / "cfm"
+from stratforge.state import state_root
+
+
+def _raw_dir() -> Path:
+    return state_root() / "data" / "raw"
+
+
+def _cfm_dir() -> Path:
+    return state_root() / "data" / "cfm"
 
 
 def _frame_to_bars(df: pd.DataFrame, freq: str) -> list[dict]:
@@ -40,7 +46,7 @@ def _frame_to_bars(df: pd.DataFrame, freq: str) -> list[dict]:
 
 @lru_cache(maxsize=16)
 def load_cde_4h(symbol: str) -> list[dict]:
-    path = CFM_DIR / f"{symbol.upper()}_CDE_1h.parquet"
+    path = _cfm_dir() / f"{symbol.upper()}_CDE_1h.parquet"
     if not path.is_file():
         return []
     df = pd.read_parquet(path)
@@ -72,7 +78,7 @@ def load_4h_bars(
     end: str | None = None,
     raw_dir: str = "",
 ) -> list[dict]:
-    path = Path(raw_dir or RAW_DIR) / f"{symbol.upper()}_USD_5m.parquet"
+    path = Path(raw_dir or _raw_dir()) / f"{symbol.upper()}_USD_5m.parquet"
     if not path.is_file():
         return []
     df = pd.read_parquet(path)
