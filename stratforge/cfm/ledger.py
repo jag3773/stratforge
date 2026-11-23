@@ -244,18 +244,19 @@ class FuturesLedger:
         eq = self.equity()
         if eq <= 0:
             return None
-        fee_pad = 1.0 + float(self.fee_rate)
-        max_notional = max(0.0, self.available() * float(self.max_leverage) / fee_pad)
+        lev = max(float(self.max_leverage), 1.0)
+        fee_rate = float(self.fee_rate)
+        avail = self.available()
+        denom = (1.0 / lev) + fee_rate
+        max_notional = max(0.0, avail / denom) if denom > 0 else 0.0
         notional = min(float(target_notional), max_notional)
         qty = self.floor_qty(sym, notional / px)
         if qty <= 0:
             return None
         notional = qty * px
-        fee = notional * float(self.fee_rate)
-        margin = notional / max(float(self.max_leverage), 1e-9)
-        if fee + 1e-9 > self.cash:
-            return None
-        if margin > self.available() + 1e-6:
+        fee = notional * fee_rate
+        margin = notional / lev
+        if fee + margin > avail + 1e-6 or fee + 1e-9 > self.cash:
             return None
         self.cash -= fee
         self.fees_paid += fee

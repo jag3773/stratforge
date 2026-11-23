@@ -134,16 +134,17 @@ class BearRegimeEngine:
         st.bars += 1
         st.bars_since_trade += 1
 
-        if sym == self.cfg.regime_symbol and st.ema.initialized:
-            self.regime_bear = c < st.ema.value
-            self.regime_ready = True
-            if self._prev_regime_ema is not None:
-                self.ema_falling = st.ema.value < self._prev_regime_ema
-            self._prev_regime_ema = float(st.ema.value)
-            if self.regime_bear:
-                self.bear_persist += 1
-            else:
-                self.bear_persist = 0
+        if sym == self.cfg.regime_symbol:
+            if st.ema.initialized:
+                self.regime_bear = c < st.ema.value
+                self.regime_ready = True
+                if self._prev_regime_ema is not None:
+                    self.ema_falling = st.ema.value < self._prev_regime_ema
+                self._prev_regime_ema = float(st.ema.value)
+                if self.regime_bear:
+                    self.bear_persist += 1
+                else:
+                    self.bear_persist = 0
             self._update_daily(bar, c)
 
         if not emit:
