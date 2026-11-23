@@ -414,7 +414,7 @@ async function boot() {
   try {
     index = await loadJson<Index>("/index.json");
   } catch {
-    app.innerHTML = `<p class="err">No snapshots. From repo root: <code>.venv/bin/python viz/projector.py</code></p>`;
+    app.innerHTML = `<p class="err">No snapshots. From repo root: <code>python -m stratforge.viz.projector</code></p>`;
     setTitle(["No snapshots"]);
     return;
   }

@@ -347,3 +347,29 @@ def test_live_mark_skipped_when_already_matches():
     pts = [{"t": "2026-09-18T20:01:26+00:00", "equity": 869.82}]
     out = _append_live_mark(pts, {"ts": "2026-09-18T20:02:00+00:00"}, 869.82)
     assert out == pts
+
+
+
+def test_main_cli_explicit_root_and_out(tmp_path: Path):
+    """main() must write snapshots when --root and --out are supplied explicitly."""
+    from viz.projector import main
+
+    root = _mini_repo(tmp_path)
+    out = tmp_path / "snap"
+    rc = main(["--root", str(root), "--out", str(out)])
+    assert rc == 0
+    assert (out / "index.json").is_file()
+    idx = json.loads((out / "index.json").read_text())
+    assert idx["books"][0]["id"] == "paper"
+
+
+def test_main_cli_default_out_resolves_via_state_root(tmp_path: Path, monkeypatch):
+    """When --out is omitted, the default must come from state_root(), not __file__."""
+    from viz.projector import main
+
+    root = _mini_repo(tmp_path)
+    monkeypatch.setenv("STRATFORGE_STATE", str(root))
+    rc = main(["--root", str(root)])
+    assert rc == 0
+    default_out = root / "viz" / "snapshots"
+    assert (default_out / "index.json").is_file()

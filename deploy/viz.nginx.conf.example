@@ -16,6 +16,12 @@ server {
         add_header Cache-Control "no-store";
     }
 
+    # Built assets request /pro-trader/ because vite.config.ts base is that path.
+    # alias, not a base change. try_files does not work with alias.
+    location /pro-trader/ {
+        alias /var/lib/stratforge/viz/web/dist/;
+    }
+
     location / {
         root /var/lib/stratforge/viz/web/dist;
         try_files $uri $uri/ /index.html;
