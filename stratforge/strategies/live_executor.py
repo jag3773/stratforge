@@ -100,6 +100,21 @@ def _parse_ts(ts) -> datetime | None:
     return None
 
 
+def _ts_ns(ts) -> int:
+    """Journal stamp as nanoseconds. ISO strings and epoch seconds both occur."""
+    if isinstance(ts, (int, float)) and not isinstance(ts, bool):
+        n = int(ts)
+        if n > 10**14:
+            return n
+        if n > 10**11:
+            return n * 1_000_000
+        return n * 1_000_000_000
+    dt = _parse_ts(ts)
+    if dt is None:
+        return int(time.time() * 1e9)
+    return int(dt.timestamp() * 1_000_000_000)
+
+
 class LiveExecutor:
     def __init__(
         self,
@@ -291,7 +306,7 @@ class LiveExecutor:
                                 "side": "LONG",
                                 "entry": entry_px,
                                 "qty": qty,
-                                "ts": int(time.time() * 1e9),
+                                "ts": _ts_ns(e.get("ts")),
                                 "fee": fee,
                             }
                     positions = new_pos
@@ -328,7 +343,7 @@ class LiveExecutor:
                             "side": "LONG",
                             "entry": price,
                             "qty": qty,
-                            "ts": int(time.time() * 1e9),
+                            "ts": _ts_ns(e.get("ts")),
                             "fee": fee,
                         }
                     trades += 1
@@ -348,8 +363,8 @@ class LiveExecutor:
                             "side": "LONG",
                             "entry": float(prev.get("entry") or e.get("entry") or 0.0),
                             "qty": float(rem),
-                            "ts": int(time.time() * 1e9),
-                            "fee": float(prev.get("fee") or 0.0),
+                            "ts": _ts_ns(e.get("ts") or prev.get("ts")),
+                            "fee": float(prev.get("fee") or e.get("fee") or 0.0),
                         }
                     elif sym:
                         positions.pop(sym, None)
@@ -633,7 +648,12 @@ class LiveExecutor:
                 "reason": reason,
                 "cash": self.cash,
                 "positions": {
-                    k: {"qty": v["qty"], "entry": v["entry"]} for k, v in new_pos.items()
+                    k: {
+                        "qty": v["qty"],
+                        "entry": v["entry"],
+                        "fee": float(v.get("fee") or 0.0),
+                    }
+                    for k, v in new_pos.items()
                 },
             }
         )
