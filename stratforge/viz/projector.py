@@ -14,8 +14,6 @@ from typing import Any
 
 from stratforge.state import state_root
 
-_ROOT = state_root()
-
 from strategies.config_load import DNA_KEYS, load_config
 from strategies.display_time import format_et
 from scripts.paper_status import compute_live_status, compute_status
@@ -388,11 +386,11 @@ def project(*, root: Path, out: Path) -> Path:
 
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description="Project pro-trader journals into viz snapshots.")
-    p.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[1])
+    p.add_argument("--root", type=Path, default=None)
     p.add_argument("--out", type=Path, default=None)
     args = p.parse_args(argv)
-    root = args.root
-    out = args.out or (root / "viz" / "snapshots")
+    root = args.root or state_root()
+    out = args.out or (state_root() / "viz" / "snapshots")
     project(root=root, out=out)
     print(f"wrote {out}")
     return 0
