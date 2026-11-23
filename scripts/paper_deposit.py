@@ -2,7 +2,7 @@
 """Deposit cash into the paper journal (CASH_DEPOSIT) without placing trades.
 
 Restores the book from the journal, applies deposit, journals it.
-Restart pro-trader-paper.service afterward so the node reloads cash.
+Restart stratforge-paper.service afterward so the node reloads cash.
 
 Usage:
   .venv/bin/python scripts/paper_deposit.py 250
@@ -17,6 +17,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+import stratforge  # noqa: E402
 from strategies.paper_executor import PaperExecutor  # noqa: E402
 
 PAPER_JOURNAL = ROOT / "data" / "execution_log.jsonl"
@@ -60,7 +61,7 @@ def main() -> int:
         f"cash=${dep['cash']:.2f} equity≈${dep['equity']:.2f} "
         f"start_usd=${dep['start_usd']:.2f}"
     )
-    print("NOTE: restart pro-trader-paper.service so the node picks this up.")
+    print("NOTE: restart stratforge-paper.service so the node picks this up.")
     return 0
 
 

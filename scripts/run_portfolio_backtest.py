@@ -19,6 +19,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+import stratforge  # noqa: E402
 from strategies.research_replay import (  # noqa: E402
     btc_buyhold_end,
     load_strategy_cfg,

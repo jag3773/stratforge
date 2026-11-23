@@ -9,8 +9,9 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
+_PKG = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(_PKG))
+from stratforge.state import state_root  # noqa: E402
 
 from cfm.bars import load_cde_4h
 from cfm.replay import run_replay, write_json
@@ -18,7 +19,7 @@ from cfm.strats import WeeklySma
 from cfm.strats_cde import CrossSectionMom, TsmomCapLong
 from cfm.venue import cde_symbols
 
-OUT = ROOT / "results" / "backtests" / "cfm" / "cde_universe"
+OUT = state_root() / "results" / "backtests" / "cfm" / "cde_universe"
 START, END = "2025-07-19", "2026-08-27"
 SSOT_END = 1219.68
 

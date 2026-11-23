@@ -16,8 +16,8 @@ from pathlib import Path
 
 import pandas as pd
 
-ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "data" / "cfm"
+from stratforge.state import state_root
+
 UA = {"User-Agent": "pro-trader-cfm-research/1.0"}
 PRODUCTS = {
     "BTC": "BIP-20DEC30-CDE",
@@ -51,8 +51,8 @@ def fetch_chunk(product_id: str, start: int, end: int, gran: str = "ONE_HOUR") -
 
 
 def download_hourly(symbol: str, product_id: str) -> Path:
-    OUT.mkdir(parents=True, exist_ok=True)
-    path = OUT / f"{symbol}_CDE_1h.parquet"
+    (state_root() / "data" / "cfm").mkdir(parents=True, exist_ok=True)
+    path = (state_root() / "data" / "cfm") / f"{symbol}_CDE_1h.parquet"
     now = int(time.time())
     have_max = 0
     rows: list[dict] = []
@@ -114,7 +114,7 @@ def download_hourly(symbol: str, product_id: str) -> Path:
 
 
 def snapshot_venue() -> Path:
-    out = OUT / "live_snapshot.json"
+    out = (state_root() / "data" / "cfm") / "live_snapshot.json"
     snap: dict = {"ts_unix": int(time.time()), "products": {}}
     for sym, pid in PRODUCTS.items():
         js = _get(f"https://api.coinbase.com/api/v3/brokerage/market/products/{urllib.parse.quote(pid, safe='')}")
@@ -139,7 +139,7 @@ def snapshot_venue() -> Path:
 
 
 def _products() -> dict[str, str]:
-    uni = ROOT / "config" / "cfm" / "universe_cde.json"
+    uni = state_root() / "config" / "cfm" / "universe_cde.json"
     if uni.is_file():
         raw = json.loads(uni.read_text())
         return {k: v["product_id"] for k, v in (raw.get("symbols") or {}).items()}

@@ -23,6 +23,7 @@ ROOT = Path(os.environ.get("NAUTILUS_ROOT", Path(__file__).resolve().parents[1])
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+import stratforge  # noqa: E402
 from strategies.display_time import format_et  # noqa: E402
 
 CURSOR_PATH = Path(

@@ -4,14 +4,21 @@ import json
 from pathlib import Path
 from typing import Any
 
-ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_VENUE = ROOT / "config" / "cfm" / "venue.json"
+from stratforge.state import state_root
+
+def _root() -> Path:
+    return state_root()
+
+
+def _default_venue() -> Path:
+    return _root() / "config" / "cfm" / "venue.json"
 
 
 def load_venue(path: str | Path | None = None) -> dict[str, Any]:
-    p = Path(path) if path else DEFAULT_VENUE
+    root = _root()
+    p = Path(path) if path else _default_venue()
     if not p.is_absolute():
-        p = ROOT / p
+        p = root / p
     raw = json.loads(p.read_text())
     return {k: v for k, v in raw.items() if not str(k).startswith("_") and k != "comment"}
 
@@ -23,7 +30,7 @@ def multiplier(symbol: str, venue: dict | None = None) -> float:
 
 
 def load_cde_universe() -> dict[str, Any]:
-    p = ROOT / "config" / "cfm" / "universe_cde.json"
+    p = _root() / "config" / "cfm" / "universe_cde.json"
     raw = json.loads(p.read_text())
     return raw.get("symbols") or {}
 

@@ -12,13 +12,14 @@ import sys
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
+_PKG = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(_PKG))
+from stratforge.state import state_root  # noqa: E402
 
 from cfm.replay import run_replay, write_json
 from cfm.strats import WeeklySma
 
-OUT = ROOT / "results" / "backtests" / "cfm" / "validate"
+OUT = state_root() / "results" / "backtests" / "cfm" / "validate"
 END = "2026-08-27"
 PRIMARY = ("2023-08-28", END)
 

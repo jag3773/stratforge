@@ -15,8 +15,6 @@ from cfm.ledger import FuturesLedger
 from cfm.strats import Intent
 from cfm.venue import cde_multipliers, load_venue, multiplier
 
-ROOT = Path(__file__).resolve().parents[1]
-
 
 def _align(bar_map: dict[str, list[dict]]) -> list[tuple[int, dict[str, dict]]]:
     """Union of timestamps → {sym: bar}."""

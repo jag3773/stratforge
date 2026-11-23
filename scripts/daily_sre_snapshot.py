@@ -12,6 +12,7 @@ from pathlib import Path
 ROOT = Path(os.environ.get("NAUTILUS_ROOT", Path(__file__).resolve().parents[1]))
 if str(ROOT) not in __import__("sys").path:
     __import__("sys").path.insert(0, str(ROOT))
+import stratforge  # noqa: E402
 from strategies.display_time import format_et, next_4h_close, next_4h_close_et  # noqa: E402
 JOBS_JSON = Path(
     os.environ.get(
@@ -80,7 +81,7 @@ def _section(title: str) -> None:
 
 def systemd_units() -> None:
     _section("systemd")
-    for unit in ("pro-trader-paper.service", "pro-trader-live.service"):
+    for unit in ("stratforge-paper.service", "stratforge-live.service"):
         code, out = _run(["systemctl", "--user", "show", unit, "-p", UNIT_PROPS])
         print(f"### {unit} (show_exit={code})")
         print(out or "(no output)")
@@ -231,7 +232,7 @@ def scripts() -> None:
     _section("watchdog_scripts")
     py = ROOT / ".venv" / "bin" / "python"
     exe = str(py) if py.is_file() else "python3"
-    for rel in ("scripts/ops_watchdog.py", "scripts/feed_health_check.py"):
+    for rel in ("scripts/ops_watchdog.py",):
         code, out = _run([exe, str(ROOT / rel)], timeout=30)
         print(f"{rel}: exit={code}")
         if out:
@@ -284,7 +285,7 @@ def live_unit_cmd() -> None:
             "systemctl",
             "--user",
             "show",
-            "pro-trader-live.service",
+            "stratforge-live.service",
             "-p",
             "FragmentPath",
             "-p",

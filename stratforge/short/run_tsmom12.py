@@ -13,12 +13,12 @@ import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
+_PKG = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(_PKG))
+from stratforge.state import state_root  # noqa: E402
 
 from short.ledger import ShortLedger  # noqa: E402
 from short.replay import (  # noqa: E402
-    RAW_DIR,
     _max_dd,
     _regime_slices,
     _to_dt,
@@ -64,7 +64,7 @@ def run_tsmom_replay(
 
     per: dict[str, list[dict]] = {}
     for s in symbols:
-        bars = load_4h_bars(s, start=data_start, end=trade_end, raw_dir=RAW_DIR)
+        bars = load_4h_bars(s, start=data_start, end=trade_end, raw_dir=None)
         if bars:
             per[s] = bars
 
@@ -252,7 +252,7 @@ def main() -> int:
         "kill_card": kills,
         "windows": rows,
     }
-    out_path = ROOT / "results" / "backtests" / "short" / "tsmom12_weekly.json"
+    out_path = state_root() / "results" / "backtests" / "short" / "tsmom12_weekly.json"
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(payload, indent=2, default=str))
     print(f"Wrote {out_path}")

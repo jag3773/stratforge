@@ -11,8 +11,9 @@ from pathlib import Path
 import ccxt
 import pandas as pd
 
-ROOT = Path(__file__).resolve().parents[1]
-RAW = ROOT / "data" / "raw"
+from stratforge.state import state_root
+
+RAW = state_root() / "data" / "raw"
 STEP_MS = 5 * 60 * 1000
 SLEEP = 0.25
 

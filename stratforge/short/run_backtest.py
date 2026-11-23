@@ -15,8 +15,9 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
+_PKG = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(_PKG))
+from stratforge.state import state_root  # noqa: E402
 
 from short.replay import btc_buyhold, btc_short_hold, load_cfg, run_short_replay  # noqa: E402
 
@@ -142,7 +143,7 @@ def main() -> int:
         "integer_contracts": bool(args.integer_contracts),
         "windows": reports,
     }
-    out_path = Path(args.out) if args.out else ROOT / "results" / "backtests" / "short" / "bear_regime_cover_v0.json"
+    out_path = Path(args.out) if args.out else state_root() / "results" / "backtests" / "short" / "bear_regime_cover_v0.json"
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(payload, indent=2))
     print(f"Wrote {out_path}")
